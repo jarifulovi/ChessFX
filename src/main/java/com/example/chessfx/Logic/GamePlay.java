@@ -4,6 +4,7 @@ import com.example.chessfx.Logic.Engine.Engine;
 import com.example.chessfx.Logic.Engine.Move;
 import com.example.chessfx.UI.Board_UI;
 import com.example.chessfx.UI.PawnPromotion;
+import com.example.chessfx.UI.SoundSetup;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 
@@ -16,10 +17,11 @@ public class GamePlay {
     private GridLogic gridLogic;
     private Board_UI board_ui;
     private PawnPromotion pawnPromotion;
-
+    private Engine engine;
+    private SoundSetup soundSetup;
     private GridPane boardPane;
     private StackPane[] squares;
-    private Engine engine;
+
     private TimerTask timerTask;
     private Timer timer;
     private Time time;      // Time can be null
@@ -35,7 +37,7 @@ public class GamePlay {
     boolean gameOver = false;
 
 
-    public GamePlay(GridPane boardPane, StackPane[] squares, Time time, String defaultColor, int player){
+    public GamePlay(GridPane boardPane, StackPane[] squares, Time time, String defaultColor, int player,int gameType){
         // set board grid logic and ui
         this.boardPane = boardPane;
         this.squares = squares;
@@ -48,7 +50,12 @@ public class GamePlay {
         gridLogic = new GridLogic(player);
         board_ui = new Board_UI(gridLogic.getGrid(),squares,defaultColor);
         pawnPromotion = new PawnPromotion(boardPane);
-        engine = new Engine(gridLogic);
+        soundSetup = new SoundSetup();
+
+        if(gameType == logic.ONE_PLAYER) {
+            engine = new Engine(gridLogic);
+            if(player == logic.BLACK) computerTurn();
+        }
     }
     private void init_timer(){
 
@@ -117,7 +124,7 @@ public class GamePlay {
             // piece = new piece
             update(piece,preRow,preCol,row,col);
             // Turn becomes opponent
-            check = gridLogic.isCheck(player,turn,piece,row,col);
+            check = gridLogic.makeCheck(player,turn,piece,row,col);
         }
 
         checkMoveAndReset();
@@ -135,12 +142,12 @@ public class GamePlay {
         Move engineMove = engine.randomMove(turn);
 
         if(logic.isPawnPromoting(engineMove.piece,turn,player,engineMove.newRow)){
-            // randomly select a piece
-            engineMove.piece = engine.getPawnPromotedPiece();
+
+            engineMove.piece = engine.getPawnPromotedPiece(turn);
         }
 
         update(engineMove.piece,engineMove.preRow,engineMove.preCol,engineMove.newRow,engineMove.newCol);
-        check = gridLogic.isCheck(player,turn,piece,engineMove.newRow,engineMove.newCol);
+        check = gridLogic.makeCheck(player,turn,piece,engineMove.newRow,engineMove.newCol);
 
         checkMoveAndReset();
         logic.displayTime(startTime);
@@ -178,10 +185,11 @@ public class GamePlay {
         // update
         piece = newPiece;
         update(piece,preRow,preCol,newRow,newCol);
-        check = gridLogic.isCheck(player,turn,piece,newRow,newCol);
+        check = gridLogic.makeCheck(player,turn,piece,newRow,newCol);
 
 
         checkMoveAndReset();
+        computerTurn();
     }
     public void play(StackPane square,int gameType){
 
@@ -195,23 +203,18 @@ public class GamePlay {
             myTurn(row,col);
         else {
 
-            if(turn == logic.WHITE){
-                // Issue with pawn promotion sequence
-                myTurn(row,col);
-                computerTurn();
-            }
-            else {
-                computerTurn();
-                myTurn(row,col);
-            }
+            myTurn(row,col);
+            computerTurn();
         }
     }
     private void update(int piece,int preRow,int preCol,int row,int col){
 
-        gridLogic.updateGrid(piece,preRow,preCol,row,col);
+        gridLogic.updateGrid(player,piece,preRow,preCol,row,col);
         board_ui.updateUI(squares,gridLogic.getGrid(),preRow,preCol,row,col);
 
         turn = (turn == logic.WHITE) ? logic.BLACK : logic.WHITE;
+        System.out.println(logic.isKingInCheck(gridLogic.getGrid(),turn,player));
+        //soundSetup.startMusic();
 
         if(hasTime) {
             updateTimer();

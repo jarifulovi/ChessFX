@@ -3,6 +3,7 @@ module com.example.chessfx {
     requires javafx.fxml;
     requires java.base;
     requires javafx.graphics;
+    requires java.desktop;
 
 
     opens com.example.chessfx to javafx.fxml;

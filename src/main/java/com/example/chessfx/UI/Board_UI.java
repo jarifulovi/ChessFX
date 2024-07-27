@@ -104,14 +104,14 @@ public class Board_UI {
         }
         else{
 
-            if(!logic.isOwnPiece(grid[index/8][index%8],turn)) {
+            //if(!logic.isOwnPiece(grid[index/8][index%8],turn)) {
                 if(logic.isOpponentPiece(grid[index/8][index%8],turn)){
                     square.setStyle(logic.BACKGROUND_CSS + highLightCaptures);
                 }
                 else {
                     square.setStyle(logic.BACKGROUND_CSS + highLightColor);
                 }
-            }
+            //}
 
         }
 

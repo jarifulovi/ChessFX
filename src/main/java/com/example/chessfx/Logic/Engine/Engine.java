@@ -38,8 +38,8 @@ public class Engine {
             int[][] moves = gridLogic.getValidPositions(row, col, turn);
 
             if (moves.length > 0) {
-                moves = excludeOwnPiecePosition(tempGrid,moves,turn);
-                int index = random.nextInt(moves.length);
+
+                int index =  random.nextInt(moves.length);
                 return new Move(row, col, moves[index][0], moves[index][1], tempGrid[row][col]);
             }
         }
@@ -48,23 +48,24 @@ public class Engine {
         return null;
     }
 
-    private int[][] excludeOwnPiecePosition(int[][] grid,int[][] positions,int turn){
 
-        int[][] pos = new int[64][2];
-        int index = 0;
-        for(int[] p : positions){
-            int row = p[0];
-            int col = p[1];
-            if(!logic.isOwnPiece(grid[row][col],turn)){
-                pos[index][0] = row;
-                pos[index][1] = col;
-                index++;
-            }
+    public int getPawnPromotedPiece(int turn){
+
+
+        int[] pieces = new int[4];
+        if(turn == logic.WHITE){
+            pieces[0] = logic.W_QUEEN;
+            pieces[1] = logic.W_ROOK;
+            pieces[2] = logic.W_BISHOP;
+            pieces[3] = logic.W_KNIGHT;
         }
-        return Arrays.copyOf(pos,index);
-    }
-    public int getPawnPromotedPiece(){
-
-        return random.nextInt(4);
+        else {
+            pieces[0] = logic.B_QUEEN;
+            pieces[1] = logic.B_ROOK;
+            pieces[2] = logic.B_BISHOP;
+            pieces[3] = logic.B_KNIGHT;
+        }
+        int index = random.nextInt(4);
+        return pieces[index];
     }
 }

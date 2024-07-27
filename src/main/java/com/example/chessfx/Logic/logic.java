@@ -1,5 +1,6 @@
 package com.example.chessfx.Logic;
 
+import java.io.StringBufferInputStream;
 import java.util.Arrays;
 
 public abstract class logic {
@@ -32,6 +33,8 @@ public abstract class logic {
     // For game type
     public static int TWO_PLAYER = 0;
     public static int ONE_PLAYER = 1;
+    public static String defaultWhitePlayerFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    public static String defaultBlackPlayerFEN = "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 1";
     public static String BACKGROUND_CSS = "-fx-background-color :";
     public static String FOREST_GREEN = "#69923e";
     public static String LIGHT_GREEN = "#baca44";
@@ -111,85 +114,58 @@ public abstract class logic {
         // Piece cannot be a no piece
         return (piece <= 6) ? WHITE : BLACK;
     }
-    public static int[][] setPieces(int player) {
+    public static int[][] convertFENIntoGrid(String FEN){
 
+        String[] parts = FEN.split(" ");
+        String pieceParts = parts[0];
         int[][] grid = new int[8][8];
 
-        // Set pawns for both players
-        for (int col = 0; col < 8; col++) {
-            if(player == logic.WHITE){
-                grid[6][col] = W_PAWN;
-                grid[1][col] = B_PAWN;
+        int row = 0;
+        int col = 0;
+
+        for(char ch : pieceParts.toCharArray()){
+
+            if(Character.isDigit(ch)){
+                col += Character.getNumericValue(ch);
             }
-            else {
-                grid[6][col] = B_PAWN;
-                grid[1][col] = W_PAWN;
+            else if(Character.isLetter(ch)){
+                int piece = getPieceValue(ch);
+                grid[row][col] = piece;
+                col++;
+            }
+
+            if(col == 8){
+                row++;
+                col = 0;
             }
         }
-
-        // Set remaining pieces for the given player (white or black)
-
-        // set rooks
-        if(player == WHITE){
-            grid[0][0] = B_ROOK;
-            grid[0][7] = B_ROOK;
-            grid[7][0] = W_ROOK;
-            grid[7][7] = W_ROOK;
-        }
-        else {
-            grid[0][0] = W_ROOK;
-            grid[0][7] = W_ROOK;
-            grid[7][0] = B_ROOK;
-            grid[7][7] = B_ROOK;
-        }
-
-        // set knights
-        if(player == WHITE){
-            grid[0][1] = B_KNIGHT;
-            grid[0][6] = B_KNIGHT;
-            grid[7][1] = W_KNIGHT;
-            grid[7][6] = W_KNIGHT;
-        }
-        else {
-            grid[0][1] = W_KNIGHT;
-            grid[0][6] = W_KNIGHT;
-            grid[7][1] = B_KNIGHT;
-            grid[7][6] = B_KNIGHT;
-        }
-
-        // set bishops
-        if(player == WHITE){
-            grid[0][2] = B_BISHOP;
-            grid[0][5] = B_BISHOP;
-            grid[7][2] = W_BISHOP;
-            grid[7][5] = W_BISHOP;
-        }
-        else {
-            grid[0][2] = W_BISHOP;
-            grid[0][5] = W_BISHOP;
-            grid[7][2] = B_BISHOP;
-            grid[7][5] = B_BISHOP;
-        }
-
-        // set queens and kings
-        if(player == WHITE){
-            grid[0][3] = B_QUEEN;
-            grid[0][4] = B_KING;
-            grid[7][3] = W_QUEEN;
-            grid[7][4] = W_KING;
-        }
-        else {
-            grid[0][3] = W_QUEEN;
-            grid[0][4] = W_KING;
-            grid[7][3] = B_QUEEN;
-            grid[7][4] = B_KING;
-        }
-
         return grid;
     }
-    public static int[][] setGridPC(){
+    private static int getPieceValue(char piece) {
+        // Map character to piece value
+        switch (piece) {
+            case 'p': return logic.B_PAWN;
+            case 'r': return logic.B_ROOK;
+            case 'n': return logic.B_KNIGHT;
+            case 'b': return logic.B_BISHOP;
+            case 'q': return logic.B_QUEEN;
+            case 'k': return logic.B_KING;
+            case 'P': return logic.W_PAWN;
+            case 'R': return logic.W_ROOK;
+            case 'N': return logic.W_KNIGHT;
+            case 'B': return logic.W_BISHOP;
+            case 'Q': return logic.W_QUEEN;
+            case 'K': return logic.W_KING;
+            default: return logic.NO_PIECE;
+        }
+    }
+
+    public static int[][] setGridPC(String FEN){
 
         int[][] gridPC = new int[8][8];
+        String[] parts = FEN.split(" ");
+        String castlingPart = parts[2];
+
         // Set castling
         gridPC[0][0] = logic.CASTLE;
         gridPC[0][7] = logic.CASTLE;
@@ -198,6 +174,7 @@ public abstract class logic {
 
         return gridPC;
     }
+
     public static boolean validSquareClick(int[][] positions,int row,int col){
 
         for(int[] pos : positions){
@@ -206,7 +183,7 @@ public abstract class logic {
         return false;
     }
 
-    public static int[][] validKnightSquares(int row, int col) {
+    public static int[][] validKnightSquares(int row, int col,int[][] grid,int turn) {
         int[][] validSquares = new int[8][2];
         int validSquareCount = 0;
 
@@ -220,7 +197,7 @@ public abstract class logic {
             int newCol = col + colOffsets[i];
 
             // Check if the new square is within board boundaries
-            if (isWithinBoard(newRow,newCol)) {
+            if (isWithinBoard(newRow,newCol) && !logic.isOwnPiece(grid[newRow][newCol],turn)) {
 
                 validSquares[validSquareCount][0] = newRow;
                 validSquares[validSquareCount][1] = newCol;
@@ -230,13 +207,14 @@ public abstract class logic {
 
         return Arrays.copyOf(validSquares, validSquareCount);
     }
-    public static int[][] validSquaresInDirection(int row, int col,int[][] grid, int[] rowOffsets, int[] colOffsets) {
+    public static int[][] validSquaresInDirection(int row, int col,int turn,int[][] grid, int[] rowOffsets, int[] colOffsets) {
         int[][] validSquares = new int[28][2]; // Maximum 14 valid squares
         int validSquareCount = 0;
 
         for (int i = 0; i < rowOffsets.length; i++) {
             int newRow = row + rowOffsets[i];
             int newCol = col + colOffsets[i];
+
 
             while (logic.isWithinBoard(newRow, newCol) && grid[newRow][newCol] == logic.NO_PIECE) {
                 validSquares[validSquareCount][0] = newRow;
@@ -247,8 +225,8 @@ public abstract class logic {
                 newCol += colOffsets[i];
             }
 
-            // If an occupied square is encountered, add it for capturing purposes
-            if (isWithinBoard(newRow, newCol)) {
+            // If first occupied piece is opponent piece
+            if (isWithinBoard(newRow, newCol) && logic.isOpponentPiece(grid[newRow][newCol],turn)) {
                 validSquares[validSquareCount][0] = newRow;
                 validSquares[validSquareCount][1] = newCol;
                 validSquareCount++;
@@ -257,30 +235,30 @@ public abstract class logic {
 
         return Arrays.copyOf(validSquares, validSquareCount);
     }
-    public static int[][] validRookSquares(int row,int col,int[][] grid){
+    public static int[][] validRookSquares(int row,int col,int turn,int[][] grid){
 
         // Define movement directions (row and column changes)
         int[] rowOffsets = {1, -1, 0, 0}; // Up, down, right, left
         int[] colOffsets = {0, 0, 1, -1};
 
-        return logic.validSquaresInDirection(row,col,grid,rowOffsets,colOffsets);
+        return logic.validSquaresInDirection(row,col,turn,grid,rowOffsets,colOffsets);
     }
 
-    public static int[][] validBishopSquares(int row,int col,int[][] grid){
+    public static int[][] validBishopSquares(int row,int col,int turn,int[][] grid){
 
         // Define movement directions (row and column changes)
         int[] rowOffsets = {1, 1, -1, -1};
         int[] colOffsets = {1, -1, 1, -1};
 
-        return logic.validSquaresInDirection(row,col,grid,rowOffsets,colOffsets);
+        return logic.validSquaresInDirection(row,col,turn,grid,rowOffsets,colOffsets);
     }
-    public static int[][] validQueenSquares(int row,int col,int[][] grid){
+    public static int[][] validQueenSquares(int row,int col,int turn,int[][] grid){
 
         // Define movement directions (row and column changes)
         int[] rowOffsets = {1, 1, -1, -1, 1,-1, 0, 0};
         int[] colOffsets = {1, -1, 1, -1, 0, 0, 1,-1};
 
-        return logic.validSquaresInDirection(row,col,grid,rowOffsets,colOffsets);
+        return logic.validSquaresInDirection(row,col,turn,grid,rowOffsets,colOffsets);
     }
 
     public static int[][] validKingAttackSquares(int row,int col){
@@ -324,6 +302,191 @@ public abstract class logic {
             validSquareCount++;
         }
         return Arrays.copyOf(validSquares,validSquareCount);
+    }
+
+    public static boolean isKingInCheck(int[][] grid,int turn,int player){
+
+        int[] kingPos = logic.getKingPosition(grid,turn);
+        int row = kingPos[0];
+        int col = kingPos[1];
+        boolean isKingCheck;
+
+        isKingCheck = rookAndQueenCheck(grid,turn,row,col) || bishopAndQueenCheck(grid,turn,row,col)
+                        || knightCheck(grid,turn,row,col) || pawnCheck(grid,player,turn,row,col)
+                            || kingCheck(grid,turn,row,col);
+
+
+        return isKingCheck;
+    }
+    public static boolean isCheckSquare(int[][] grid,int row,int col,int turn,int player){
+
+        return rookAndQueenCheck(grid,turn,row,col) || bishopAndQueenCheck(grid,turn,row,col)
+                || knightCheck(grid,turn,row,col) || pawnCheck(grid,player,turn,row,col)
+                || kingCheck(grid,turn,row,col);
+    }
+    private static boolean rookAndQueenCheck(int[][] grid,int turn,int row,int col){
+        for (int i = row + 1; i < 8; i++) {
+            int piece = grid[i][col];
+            if (piece != logic.NO_PIECE) {
+                if (logic.isOpponentPiece(piece, turn)) {
+                    if (piece == logic.W_ROOK || piece == logic.B_ROOK ||
+                            piece == logic.W_QUEEN || piece == logic.B_QUEEN) {
+                        return true;
+                    }
+                }
+                break;
+            }
+        }
+        for (int i = row - 1; i >= 0; i--) {
+            int piece = grid[i][col];
+            if (piece != logic.NO_PIECE) {
+                if (logic.isOpponentPiece(piece, turn)) {
+                    if (piece == logic.W_ROOK || piece == logic.B_ROOK ||
+                            piece == logic.W_QUEEN || piece == logic.B_QUEEN) {
+                        return true;
+                    }
+                }
+                break;
+            }
+        }
+        for(int i = col + 1; i < 8; i++){
+            int piece = grid[row][i];
+            if(piece != logic.NO_PIECE){
+                if(logic.isOpponentPiece(piece,turn)){
+                    if (piece == logic.W_ROOK || piece == logic.B_ROOK ||
+                            piece == logic.W_QUEEN || piece == logic.B_QUEEN) {
+                        return true;
+                    }
+                }
+                break;
+            }
+        }
+        for(int i = col - 1; i >= 0; i--){
+            int piece = grid[row][i];
+            if(piece != logic.NO_PIECE){
+                if(logic.isOpponentPiece(piece,turn)){
+                    if (piece == logic.W_ROOK || piece == logic.B_ROOK ||
+                            piece == logic.W_QUEEN || piece == logic.B_QUEEN) {
+                        return true;
+                    }
+                }
+                break;
+            }
+        }
+        return false;
+    }
+    private static boolean bishopAndQueenCheck(int[][] grid,int turn,int row,int col){
+        // Check for diagonal checks (downward-right)
+        for (int i = row + 1, j = col + 1; i < 8 && j < 8; i++, j++) {
+            int piece = grid[i][j];
+            if (piece != logic.NO_PIECE) {
+                if (logic.isOpponentPiece(piece, turn)) {
+                    if (piece == logic.W_BISHOP || piece == logic.B_BISHOP ||
+                            piece == logic.W_QUEEN || piece == logic.B_QUEEN) {
+                        return true;
+                    }
+                }
+                break;
+            }
+        }
+        // (downward-left)
+        for (int i = row + 1, j = col - 1; i < 8 && j >= 0; i++, j--) {
+            int piece = grid[i][j];
+            if (piece != logic.NO_PIECE) {
+                if (logic.isOpponentPiece(piece, turn)) {
+                    if (piece == logic.W_BISHOP || piece == logic.B_BISHOP ||
+                            piece == logic.W_QUEEN || piece == logic.B_QUEEN) {
+                        return true;
+                    }
+                }
+                break;
+            }
+        }
+        // (upward-right)
+        for (int i = row - 1, j = col + 1; i >= 0 && j < 8; i--, j++) {
+            int piece = grid[i][j];
+            if (piece != logic.NO_PIECE) {
+                if (logic.isOpponentPiece(piece, turn)) {
+                    if (piece == logic.W_BISHOP || piece == logic.B_BISHOP ||
+                            piece == logic.W_QUEEN || piece == logic.B_QUEEN) {
+                        return true;
+                    }
+                }
+                break;
+            }
+        }
+        // (upward-left)
+        for (int i = row - 1, j = col - 1; i >= 0 && j >= 0; i--, j--) {
+            int piece = grid[i][j];
+            if (piece != logic.NO_PIECE) {
+                if (logic.isOpponentPiece(piece, turn)) {
+                    if (piece == logic.W_BISHOP || piece == logic.B_BISHOP ||
+                            piece == logic.W_QUEEN || piece == logic.B_QUEEN) {
+                        return true;
+                    }
+                }
+                break;
+            }
+        }
+        return false;
+    }
+    private static boolean knightCheck(int[][] grid,int turn,int row,int col){
+
+        // Check for knight attacks
+        int[][] knightOffsets = {{-2, -1}, {-1, -2}, {-2, 1}, {-1, 2}, {1, -2}, {2, -1}, {1, 2}, {2, 1}};
+        for (int[] offset : knightOffsets) {
+            int newRow = row + offset[0];
+            int newCol = col + offset[1];
+
+            if (isWithinBoard(newRow, newCol)) {
+                int piece = grid[newRow][newCol];
+                if (logic.isOpponentPiece(piece, turn) && (piece == logic.W_KNIGHT || piece == logic.B_KNIGHT)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    private static boolean pawnCheck(int[][] grid,int player,int turn,int row,int col){
+
+        // if turn == player then pawn attacks upward else downward diagonal
+        int direction = (turn==player) ? -1 : 1;
+        int newRow = row + direction;
+        // Check diagonal left
+        int newCol = col - 1;
+        if (isWithinBoard(newRow, newCol)){
+            if(logic.isOpponentPiece(grid[newRow][newCol], turn) && (grid[newRow][newCol] == W_PAWN || grid[newRow][newCol] == B_PAWN)) {
+                return true;
+            }
+        }
+
+        // Check diagonal right
+        newRow = row + direction;
+        newCol = col + 1;
+        if (isWithinBoard(newRow, newCol)){
+            if(logic.isOpponentPiece(grid[newRow][newCol], turn) && (grid[newRow][newCol] == W_PAWN || grid[newRow][newCol] == B_PAWN)) {
+                return true;
+            }
+        }
+
+
+        return false;
+    }
+    private static boolean kingCheck(int[][] grid,int turn,int row,int col){
+
+        int[][] kingOffsets = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
+        for (int[] offset : kingOffsets) {
+            int newRow = row + offset[0];
+            int newCol = col + offset[1];
+
+            if (isWithinBoard(newRow, newCol)) {
+                int piece = grid[newRow][newCol];
+                if (logic.isOpponentPiece(piece, turn) && (piece == logic.W_KING || piece == logic.B_KING)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public static int[] getKingPosition(int[][] grid, int turn) {

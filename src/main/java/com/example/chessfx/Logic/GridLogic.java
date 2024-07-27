@@ -8,8 +8,16 @@ public class GridLogic {
 
     public GridLogic(int player){
         grid = new int[8][8];
-        grid = logic.setPieces(player);
-        pieceLogic = new PieceLogic(player);
+
+        String FEN = "";
+        if(player == logic.WHITE)
+            FEN = logic.defaultWhitePlayerFEN;
+        else
+            FEN = logic.defaultBlackPlayerFEN;
+
+        grid = logic.convertFENIntoGrid(FEN);
+
+        pieceLogic = new PieceLogic(player,FEN);
     }
     public int[][] getGrid(){
         return this.grid;
@@ -59,23 +67,24 @@ public class GridLogic {
         }
         return true;
     }
-    public boolean isCheck(int player,int opponent,int piece,int row,int col){
+    public boolean makeCheck(int player, int opponent, int piece, int row, int col){
 
         // Piece is current turn piece
-        // Opponent is not current turn
+        // Opponent is opposite turn
         if(piece == logic.W_KING || piece == logic.B_KING){
             return false;
         }
 
         int[] kingPos = logic.getKingPosition(grid,opponent);
+        int turn = logic.getPieceColor(piece);
 
         if(piece == logic.W_PAWN || piece == logic.B_PAWN){
-            int turn = logic.getPieceColor(piece);
+
             int[][] positions = logic.validPawnAttackSquares(turn,player,row,col);
             return logic.isWithinPosition(positions,kingPos);
         }
         if(piece == logic.W_KNIGHT || piece == logic.B_KNIGHT){
-            int[][] positions = logic.validKnightSquares(row,col);
+            int[][] positions = logic.validKnightSquares(row,col,grid,turn);
             return logic.isWithinPosition(positions,kingPos);
         }
 
@@ -92,7 +101,7 @@ public class GridLogic {
         }
         return false;
     }
-    public void updateGrid(int piece,int preRow,int preCol,int newRow,int newCol){
+    public void updateGrid(int player,int piece,int preRow,int preCol,int newRow,int newCol){
         // when a valid move is made by player or engine
         int turn = logic.getPieceColor(piece);
 
@@ -107,7 +116,7 @@ public class GridLogic {
 
 
         // Update castling
-        pieceLogic.updateCastling(grid,piece,preRow,preCol,newRow,newCol);
+        pieceLogic.updateCastling(grid,player,piece,preRow,preCol,newRow,newCol);
     }
 
 

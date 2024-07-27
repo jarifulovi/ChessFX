@@ -13,9 +13,9 @@ public class PieceLogic {
     private int[][] gridPC;  // This keeps en passant and castling positions
     public boolean notWhiteLeftCastle,notWhiteRightCastle,notBlackLeftCastle,notBlackRightCastle;
 
-    public PieceLogic(int player){
+    public PieceLogic(int player,String FEN){
         illegalMove = new IllegalMove();
-        gridPC = logic.setGridPC();
+        gridPC = logic.setGridPC(FEN);
         this.player = player;
         isEnPassantCapture = false;
         notWhiteLeftCastle = true;
@@ -37,22 +37,22 @@ public class PieceLogic {
             return validSquares;
         }
         else if(piece == logic.W_KNIGHT || piece == logic.B_KNIGHT){
-            validSquares  = logic.validKnightSquares(row,col);
+            validSquares  = logic.validKnightSquares(row,col,grid,turn);
             validSquares = eliminateIllegalMoves(grid,validSquares,row,col);
             return validSquares;
         }
         else if(piece == logic.W_ROOK || piece == logic.B_ROOK){
-            validSquares = logic.validRookSquares(row,col,grid);
+            validSquares = logic.validRookSquares(row,col,turn,grid);
             validSquares = eliminateIllegalMoves(grid,validSquares,row,col);
             return validSquares;
         }
         else if(piece == logic.W_BISHOP || piece == logic.B_BISHOP){
-            validSquares = logic.validBishopSquares(row,col,grid);
+            validSquares = logic.validBishopSquares(row,col,turn,grid);
             validSquares = eliminateIllegalMoves(grid,validSquares,row,col);
             return validSquares;
         }
         else if(piece == logic.W_QUEEN || piece == logic.B_QUEEN){
-            validSquares = logic.validQueenSquares(row,col,grid);
+            validSquares = logic.validQueenSquares(row,col,turn,grid);
             validSquares = eliminateIllegalMoves(grid,validSquares,row,col);
             return validSquares;
         }
@@ -73,7 +73,7 @@ public class PieceLogic {
             int newRow = targetSquare[0];
             int newCol = targetSquare[1];
 
-            // Check if the move puts your king in check (assuming isSelfCheckAfterMove exists)
+            // Check if the move puts own king in check
             if (!illegalMove.isSelfCheckAfterMove(grid, grid[startRow][startCol],player, startRow, startCol, newRow, newCol)) {
                 finalValidMoves.add(targetSquare);
             }
@@ -95,7 +95,6 @@ public class PieceLogic {
             int newRow = row + rowOffsets[i];
             int newCol = col + colOffsets[i];
 
-            // Needs to check capture piece
             if(logic.isWithinBoard(newRow,newCol) && !logic.isOwnPiece(grid[newRow][newCol],turn)){
                 validSquares[validSquareCount][0] = newRow;
                 validSquares[validSquareCount][1] = newCol;
@@ -115,7 +114,6 @@ public class PieceLogic {
             validSquareCount++;
         }
 
-        // Remove positions under attack
 
         return Arrays.copyOf(validSquares,validSquareCount);
     }
@@ -123,8 +121,11 @@ public class PieceLogic {
 
 
         boolean noPiece;
-        if(isRight) noPiece = (grid[row][5] == logic.NO_PIECE) &&
-                (grid[row][6] == logic.NO_PIECE);
+        if(isRight) {
+            noPiece = (grid[row][5] == logic.NO_PIECE) &&
+                    (grid[row][6] == logic.NO_PIECE);
+
+        }
         else
             noPiece = (grid[row][1] == logic.NO_PIECE) && (grid[row][2] == logic.NO_PIECE)
                     && (grid[row][3] == logic.NO_PIECE);
@@ -247,17 +248,32 @@ public class PieceLogic {
         }
         resetOpponentEnPassant(turn);
     }
-    public void updateCastling(int[][] grid,int piece,int preRow,int preCol,int newRow,int newCol){
+    public void updateCastling(int[][] grid,int player,int piece,int preRow,int preCol,int newRow,int newCol){
 
+        int turn = logic.getPieceColor(piece);
+        int row = (turn==player) ? 7 : 0;
         if(piece == logic.W_KING || piece == logic.B_KING){
-            gridPC[preRow][0] = logic.NO_CASTLE;
-            gridPC[preRow][7] = logic.NO_CASTLE;
+            gridPC[row][0] = logic.NO_CASTLE;
+            gridPC[row][7] = logic.NO_CASTLE;
 
             if(Math.abs(preCol - newCol) == 2 && preRow == newRow)
                 updateRook(grid,piece,preRow,preCol,newRow,newCol);
         }
         if(piece == logic.W_ROOK || piece == logic.B_ROOK){
             gridPC[preRow][preCol] = logic.NO_CASTLE;
+        }
+        // If captured
+        if(player == logic.WHITE) {
+            if (grid[7][0] != logic.W_ROOK) gridPC[7][0] = logic.NO_CASTLE;
+            if (grid[7][7] != logic.W_ROOK) gridPC[7][7] = logic.NO_CASTLE;
+            if (grid[0][0] != logic.B_ROOK) gridPC[0][0] = logic.NO_CASTLE;
+            if (grid[0][7] != logic.B_ROOK) gridPC[0][7] = logic.NO_CASTLE;
+        }
+        else {
+            if (grid[7][0] != logic.B_ROOK) gridPC[7][0] = logic.NO_CASTLE;
+            if (grid[7][7] != logic.B_ROOK) gridPC[7][7] = logic.NO_CASTLE;
+            if (grid[0][0] != logic.W_ROOK) gridPC[0][0] = logic.NO_CASTLE;
+            if (grid[0][7] != logic.W_ROOK) gridPC[0][7] = logic.NO_CASTLE;
         }
     }
     private void updateRook(int[][] grid,int piece,int preRow,int preCol,int newRow,int newCol){

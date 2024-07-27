@@ -64,7 +64,7 @@ public class Board implements Initializable {
             index++;
         }
 
-        gamePlay = new GamePlay(boardPane,squares, time,defaultColor,player);
+        gamePlay = new GamePlay(boardPane,squares, time,defaultColor,player,gameType);
 
     }
 

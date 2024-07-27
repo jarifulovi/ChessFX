@@ -41,10 +41,11 @@ public class IllegalMove {
         tempGrid[preRow][preCol] = logic.NO_PIECE;
         tempGrid[newRow][newCol] = piece;
 
-        int[][] allAttackedPositions = getAllAttackSquare(tempGrid,turn,player,false);
-        int[] kingPosition = logic.getKingPosition(tempGrid,turn);
+        //int[][] allAttackedPositions = getAllAttackSquare(tempGrid,turn,player,false);
+        //int[] kingPosition = logic.getKingPosition(tempGrid,turn);
 
-        return logic.isWithinPosition(allAttackedPositions,kingPosition);
+        //return logic.isWithinPosition(allAttackedPositions,kingPosition);
+        return logic.isKingInCheck(tempGrid,turn,player);
     }
 
 
@@ -62,16 +63,16 @@ public class IllegalMove {
                     int[][] potentialMoves = new int[0][0];
 
                     if(piece == logic.B_KNIGHT || piece == logic.W_KNIGHT){
-                        potentialMoves = logic.validKnightSquares(i,j);
+                        potentialMoves = logic.validKnightSquares(i,j,grid,turn);
                     }
                     else if(piece == logic.B_ROOK || piece == logic.W_ROOK){
-                        potentialMoves = logic.validRookSquares(i,j,grid);
+                        potentialMoves = logic.validRookSquares(i,j,turn,grid);
                     }
                     else if(piece == logic.B_BISHOP || piece == logic.W_BISHOP){
-                        potentialMoves = logic.validBishopSquares(i,j,grid);
+                        potentialMoves = logic.validBishopSquares(i,j,turn,grid);
                     }
                     else if(piece == logic.B_QUEEN || piece == logic.W_QUEEN){
-                        potentialMoves = logic.validQueenSquares(i,j,grid);
+                        potentialMoves = logic.validQueenSquares(i,j,turn,grid);
                     }
 
                     // Only check when not checking castling right
@@ -127,28 +128,9 @@ public class IllegalMove {
 
     private boolean checkAllCastleAttackSquare(int[][] grid,int[][] castlePositions,int turn,int player){
 
-        // Without pawn and king
-        int[][] validSquare = getAllAttackSquare(grid,turn,player,true);
-
         // Check if attacks exist in castle positions
-        for(int[] pos : validSquare){
-            for(int[] pos2 : castlePositions){
-                if(pos[0] == pos2[0] && pos[1] == pos2[1]) {
-                    System.out.println("castling attacks");
-                    return true;
-                }
-            }
-        }
-        // Check pawns and kings
-        int secondRank = (turn == player) ? (6) : (1);
-        int pawn = (turn == logic.WHITE) ? (logic.B_PAWN) : (logic.W_PAWN);
-        int king = (turn == logic.WHITE) ? (logic.B_KING) : (logic.W_KING);
-
-        // No opponent pawn and  king should be there
         for(int[] pos : castlePositions){
-            int row = secondRank;
-            int col = pos[1];
-            return grid[row][col] == pawn || grid[row][col] == king;
+            if(logic.isCheckSquare(grid,pos[0],pos[1],turn,player)) return true;
         }
         return false;
     }
