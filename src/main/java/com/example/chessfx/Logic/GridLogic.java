@@ -67,40 +67,7 @@ public class GridLogic {
         }
         return true;
     }
-    public boolean makeCheck(int player, int opponent, int piece, int row, int col){
 
-        // Piece is current turn piece
-        // Opponent is opposite turn
-        if(piece == logic.W_KING || piece == logic.B_KING){
-            return false;
-        }
-
-        int[] kingPos = logic.getKingPosition(grid,opponent);
-        int turn = logic.getPieceColor(piece);
-
-        if(piece == logic.W_PAWN || piece == logic.B_PAWN){
-
-            int[][] positions = logic.validPawnAttackSquares(turn,player,row,col);
-            return logic.isWithinPosition(positions,kingPos);
-        }
-        if(piece == logic.W_KNIGHT || piece == logic.B_KNIGHT){
-            int[][] positions = logic.validKnightSquares(row,col,grid,turn);
-            return logic.isWithinPosition(positions,kingPos);
-        }
-
-        boolean diagonal = logic.isDiagonal(kingPos[0],kingPos[1],row,col);
-        boolean straight = logic.isStraight(kingPos[0],kingPos[1],row,col);
-        if(piece == logic.W_QUEEN || piece == logic.B_QUEEN){
-            return diagonal || straight;
-        }
-        else if(piece == logic.W_BISHOP || piece == logic.B_BISHOP){
-            return diagonal;
-        }
-        else if(piece == logic.W_ROOK || piece == logic.B_ROOK){
-            return straight;
-        }
-        return false;
-    }
     public void updateGrid(int player,int piece,int preRow,int preCol,int newRow,int newCol){
         // when a valid move is made by player or engine
         int turn = logic.getPieceColor(piece);

@@ -8,8 +8,6 @@ import com.example.chessfx.UI.SoundSetup;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 
-import java.util.Timer;
-import java.util.TimerTask;
 
 
 public class GamePlay {
@@ -19,14 +17,11 @@ public class GamePlay {
     private PawnPromotion pawnPromotion;
     private Engine engine;
     private SoundSetup soundSetup;
-    private GridPane boardPane;
     private StackPane[] squares;
-
-    private TimerTask timerTask;
-    private Timer timer;
     private Time time;      // Time can be null
     private boolean hasTime;
     private int player;
+    private int gameType;
     private int turn = logic.WHITE;
     private boolean firstClick;
 
@@ -35,17 +30,18 @@ public class GamePlay {
     int preRow = -1,preCol = -1;
     boolean check = false;
     boolean gameOver = false;
+    String gameOverText;
 
 
-    public GamePlay(GridPane boardPane, StackPane[] squares, Time time, String defaultColor, int player,int gameType){
+    public GamePlay(GridPane boardPane, StackPane[] squares, Time time, String defaultColor, int player, int gameType){
         // set board grid logic and ui
-        this.boardPane = boardPane;
         this.squares = squares;
         this.time = time;
+        this.gameOverText = "GameOver";
         init_timer();
-        init_timerTask();
 
         this.player = player;
+        this.gameType = gameType;
         this.firstClick = false;
         gridLogic = new GridLogic(player);
         board_ui = new Board_UI(gridLogic.getGrid(),squares,defaultColor);
@@ -53,7 +49,7 @@ public class GamePlay {
         soundSetup = new SoundSetup();
 
         if(gameType == logic.ONE_PLAYER) {
-            engine = new Engine(gridLogic);
+            engine = new Engine(gridLogic,logic.getOpponentTurn(player));
             if(player == logic.BLACK) computerTurn();
         }
     }
@@ -65,35 +61,31 @@ public class GamePlay {
             time.startWhite();
         }
     }
-    private void init_timerTask(){
-        this.timer = new Timer();
-        this.timerTask = new TimerTask() {
-            @Override
-            public void run() {
+    public String getGameOverText(){
+        return gameOverText;
+    }
+    public boolean checkGameOver(){
 
-                if(hasTime) gameOver = (turn==logic.WHITE) ? (time.isTimeOver(time.getWhiteTime())) :
-                        (time.isTimeOver(time.getBlackTime()));
+        if(hasTime) gameOver = (turn==logic.WHITE) ? (time.isTimeOver(time.getWhiteTime())) :
+                (time.isTimeOver(time.getBlackTime()));
 
-                if(gameOver){
+        if(gameOver){
 
-                    if(hasTime){
-                        time.stopWhite();
-                        time.stopBlack();
-                        timer.cancel();
-                    }
-                    // Set GameOver panel
-                    System.out.println("Game over!");
-                }
+            if(hasTime){
+                time.stopWhite();
+                time.stopBlack();
+                gameOverText = (turn==logic.WHITE) ? ("Black Wins") : ("White Wins");
             }
-        };
-        timer.scheduleAtFixedRate(timerTask,0,1000);
+            System.out.println("Game over!");
+        }
+        return gameOver;
     }
     private void myTurn(int row,int col){
 
         if(gameOver) return;
+        if(gameType == logic.ONE_PLAYER && turn != player) return;
 
         long startTime = System.currentTimeMillis();
-        int opponentTurn = logic.getOpponentTurn(turn);
 
         board_ui.resetHighLight(squares,turn);
         // Move is choose to play
@@ -124,7 +116,7 @@ public class GamePlay {
             // piece = new piece
             update(piece,preRow,preCol,row,col);
             // Turn becomes opponent
-            check = gridLogic.makeCheck(player,turn,piece,row,col);
+            check = logic.isKingInCheck(gridLogic.getGrid(),turn,player);
         }
 
         checkMoveAndReset();
@@ -147,7 +139,8 @@ public class GamePlay {
         }
 
         update(engineMove.piece,engineMove.preRow,engineMove.preCol,engineMove.newRow,engineMove.newCol);
-        check = gridLogic.makeCheck(player,turn,piece,engineMove.newRow,engineMove.newCol);
+        // Turn becomes opponent
+        check = logic.isKingInCheck(gridLogic.getGrid(),turn,player);
 
         checkMoveAndReset();
         logic.displayTime(startTime);
@@ -185,7 +178,8 @@ public class GamePlay {
         // update
         piece = newPiece;
         update(piece,preRow,preCol,newRow,newCol);
-        check = gridLogic.makeCheck(player,turn,piece,newRow,newCol);
+        // Turn becomes opponent
+        check = logic.isKingInCheck(gridLogic.getGrid(),turn,player);
 
 
         checkMoveAndReset();
@@ -214,7 +208,6 @@ public class GamePlay {
 
         turn = (turn == logic.WHITE) ? logic.BLACK : logic.WHITE;
         System.out.println(logic.isKingInCheck(gridLogic.getGrid(),turn,player));
-        //soundSetup.startMusic();
 
         if(hasTime) {
             updateTimer();
@@ -223,9 +216,11 @@ public class GamePlay {
 
     private void checkMoveAndReset(){
 
+        // Turn is opponent
         // Draw positions checking
         if(logic.drawByInsufficientMaterial(gridLogic.getGrid())){
             System.out.println("Draw by insufficient material");
+            gameOverText = "Draw";
             gameOver = true;
         }
 
@@ -235,9 +230,12 @@ public class GamePlay {
 
             if(check){
                 System.out.println("check-mate");
+                gameOverText = (turn==logic.WHITE) ? ("Black wins") : ("White wins");
             }
             else {
                 System.out.println("stale-mate");
+                gameOverText = "Stale-mate";
+
             }
             gameOver = true;
         }
@@ -254,9 +252,7 @@ public class GamePlay {
         if(turn == logic.WHITE){
             time.startWhite();
             time.stopBlack();
-
             if(time.isTimeOver(time.getWhiteTime())){
-                System.out.println("White time out");
                 gameOver = true;
             }
         }
@@ -264,7 +260,6 @@ public class GamePlay {
             time.startBlack();
             time.stopWhite();
             if(time.isTimeOver(time.getBlackTime())){
-                System.out.println("Black time out");
                 gameOver = true;
             }
         }

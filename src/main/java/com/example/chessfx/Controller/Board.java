@@ -1,6 +1,7 @@
 package com.example.chessfx.Controller;
 import com.example.chessfx.Logic.*;
 
+import com.example.chessfx.UI.GameOverUI;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
@@ -27,34 +28,19 @@ public class Board implements Initializable {
     public StackPane[] squares;
 
     private GamePlay gamePlay;
+    private GameOverUI gameOverUI;
     private Time time;   // Time only work when time is > 0 meaning the game has time odds
-
+    private Timeline timeline;
 
     // This fields will be set by the parent
+    private Settings settings;
     private String defaultColor;
-    private int gameType;
-    private int player;
-    private int duration;
+    private boolean isSound;
 
     @Override
     public void initialize(URL url,ResourceBundle resourceBundle) {
 
         squares = boardPane.getChildren().toArray(StackPane[]::new);
-
-
-        // Provided from parent fxml
-        defaultColor = "white "+ logic.FOREST_GREEN;
-        player = logic.WHITE;
-        duration = 0;
-        gameType = logic.ONE_PLAYER;
-
-        setBackground();
-        if(duration > 0) {
-            time = new Time(duration);
-            setTimer();
-        }
-
-
 
 
         int index = 0;
@@ -64,36 +50,64 @@ public class Board implements Initializable {
             index++;
         }
 
-        gamePlay = new GamePlay(boardPane,squares, time,defaultColor,player,gameType);
-
     }
+    public void setSettings(Settings settings){
+        this.settings = settings;
+        isSound = settings.isSound;
+        if(settings.boardType == logic.GREEN_BOARD) defaultColor = "white "+logic.FOREST_GREEN;
+        else if(settings.boardType == logic.BROWN_BOARD) defaultColor = "white "+logic.BROWN;
+        else if(settings.boardType == logic.BLACK_BOARD) defaultColor = "white "+logic.GRAY;
 
+        init_gamePlay();
+    }
+    private void init_gamePlay(){
+        setBackground();
+        if(settings.duration > 0) {
+            time = new Time(settings.duration);
+        }
+        setTimeLine();
+        gamePlay = new GamePlay(boardPane,squares, time,defaultColor, settings.player, settings.gameType);
+        System.out.println("Time : "+settings.duration);
+        System.out.println("Player : "+settings.player);
+        System.out.println("GameType : "+settings.gameType);
+        System.out.println("sound : "+settings.isSound);
+    }
 
     private void mouseClick(StackPane square) {
 
         // According to game
         // 2v2 or computer
         // Time constrains
-        gamePlay.play(square,gameType);
+        gamePlay.play(square, settings.gameType);
     }
 
-    private void setTimer(){
 
-        Timeline timeline;
+    private void setTimeLine() {
+        // Initialize the timeline
+        timeline = new Timeline(new KeyFrame(Duration.seconds(0.5), event -> {
+            // Update the timer labels
+            if (settings.duration > 0) {
+                if (settings.player == logic.WHITE) {
+                    ownTimerLabel.setText(String.valueOf(time.getWhiteTime()));
+                    opponentTimerLabel.setText(String.valueOf(time.getBlackTime()));
+                } else {
+                    ownTimerLabel.setText(String.valueOf(time.getBlackTime()));
+                    opponentTimerLabel.setText(String.valueOf(time.getWhiteTime()));
+                }
+            }
 
-        if(player == logic.WHITE) {
-            timeline = new Timeline(new KeyFrame(Duration.seconds(0.5), event -> {
-                ownTimerLabel.setText(String.valueOf(time.getWhiteTime()));
-                opponentTimerLabel.setText(String.valueOf(time.getBlackTime()));
-            }));
-        }
-        else {
-            timeline = new Timeline(new KeyFrame(Duration.seconds(0.5), event -> {
-                ownTimerLabel.setText(String.valueOf(time.getBlackTime()));
-                opponentTimerLabel.setText(String.valueOf(time.getWhiteTime()));
-            }));
-        }
+            // Check if the game is over
+            boolean gameOver = gamePlay.checkGameOver();
+            if (gameOver) {
+                // Stop the timeline
+                timeline.stop();
+                // Show the game over UI
+                String text = gamePlay.getGameOverText();
+                gameOverUI = new GameOverUI(anchorPane,settings,text);
+            }
+        }));
 
+        // Set the timeline to repeat indefinitely
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
     }
@@ -103,8 +117,8 @@ public class Board implements Initializable {
         String css = logic.BACKGROUND_CSS + logic.DIM_GRAY;
         anchorPane.setStyle(css);
 
-        if(duration > 0) {
-            if (player == logic.WHITE) {
+        if(settings.duration > 0) {
+            if (settings.player == logic.WHITE) {
                 opponentTimerLabel.setStyle(logic.BACKGROUND_CSS + logic.BLACK_COLOR);
                 opponentTimerLabel.setTextFill(new Color(1.0,1.0,1.0,1));
                 ownTimerLabel.setStyle(logic.BACKGROUND_CSS + logic.WHITE_COLOR);

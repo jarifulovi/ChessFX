@@ -33,6 +33,11 @@ public abstract class logic {
     // For game type
     public static int TWO_PLAYER = 0;
     public static int ONE_PLAYER = 1;
+
+    // Game settings
+    public static int GREEN_BOARD = 0;
+    public static int BROWN_BOARD = 1;
+    public static int BLACK_BOARD = 2;
     public static String defaultWhitePlayerFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     public static String defaultBlackPlayerFEN = "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 1";
     public static String BACKGROUND_CSS = "-fx-background-color :";
@@ -42,6 +47,7 @@ public abstract class logic {
     public static String GRAY = "#4b4847";
     public static String DIM_GRAY = "#696969";
     public static String BROWN = "#ab8149";
+    public static String BLUE_BUTTON = "#1899D6";
 
     public static String BLACK_COLOR = "#000000";
     public static String WHITE_COLOR = "#ffffff";

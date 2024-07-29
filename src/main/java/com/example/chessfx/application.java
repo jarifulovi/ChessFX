@@ -1,5 +1,6 @@
 package com.example.chessfx;
 
+import com.example.chessfx.Logic.loadFXML;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -10,8 +11,11 @@ import java.io.IOException;
 public class application extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(application.class.getResource("board.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(application.class.getResource(loadFXML.MENU_FXML));
         Scene scene = new Scene(fxmlLoader.load());
+
+        loadFXML.addCSSInScene(scene);
+
         stage.setTitle("ChessFX");
         stage.setScene(scene);
         stage.show();

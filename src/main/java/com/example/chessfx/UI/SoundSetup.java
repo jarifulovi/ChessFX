@@ -1,6 +1,5 @@
 package com.example.chessfx.UI;
 
-import com.example.chessfx.Logic.logic;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -51,4 +50,5 @@ public class SoundSetup {
             System.out.println("Exception message: " + e.getMessage());
         }
     }
+
 }

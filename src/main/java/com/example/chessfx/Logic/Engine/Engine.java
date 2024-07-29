@@ -9,9 +9,11 @@ public class Engine {
 
     private GridLogic gridLogic;
     private Random random;
-    public Engine(GridLogic gridLogic){
+    private int turn;
+    public Engine(GridLogic gridLogic,int turn){
         this.gridLogic = gridLogic;
         this.random = new Random();
+        this.turn = turn;
     }
 
     public Move randomMove(int turn){
