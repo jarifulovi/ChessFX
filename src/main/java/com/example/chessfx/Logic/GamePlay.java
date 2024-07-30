@@ -66,9 +66,11 @@ public class GamePlay {
     }
     public boolean checkGameOver(){
 
-        if(hasTime) gameOver = (turn==logic.WHITE) ? (time.isTimeOver(time.getWhiteTime())) :
+        boolean timeEnd = false;
+        if(hasTime) timeEnd = (turn==logic.WHITE) ? (time.isTimeOver(time.getWhiteTime())) :
                 (time.isTimeOver(time.getBlackTime()));
 
+        gameOver = gameOver || timeEnd;
         if(gameOver){
 
             if(hasTime){

@@ -56,7 +56,7 @@ public class Play_Controller implements Initializable {
         // Create a new ToggleGroup
         toggleGroup = new ToggleGroup();
         toggleButtonWhite.getStyleClass().add("toggle-button");
-        toggleButtonWhite.getStyleClass().add("toggle-button");
+        toggleButtonBlack.getStyleClass().add("toggle-button");
         toggleButtonWhite.setText("W");
         toggleButtonBlack.setText("B");
 
@@ -77,8 +77,10 @@ public class Play_Controller implements Initializable {
 
                 // Update settings based on selection
                 if ("B".equals(selectedText)) {
+
                     settings.player = logic.BLACK;
                 } else if ("W".equals(selectedText)) {
+
                     settings.player = logic.WHITE;
                 }
             }

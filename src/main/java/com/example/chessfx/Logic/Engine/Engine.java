@@ -5,8 +5,17 @@ import com.example.chessfx.Logic.logic;
 
 import java.util.*;
 
+
+// Plays a random move
+// Prioritizes :
+//               1 : Promote a pawn to queen
+//               2 : Defend undefended piece
+//               3 : Capture opponent undefended pieces
+//               4 : Capture an advantageous capture
+//               5 : Move to a safe square
 public class Engine {
 
+    private Evaluation evaluation;
     private GridLogic gridLogic;
     private Random random;
     private int turn;
@@ -14,12 +23,12 @@ public class Engine {
         this.gridLogic = gridLogic;
         this.random = new Random();
         this.turn = turn;
+        this.evaluation = new Evaluation(turn);
     }
 
     public Move randomMove(int turn){
 
         //logic.delay(1000);
-        // select a random piece
         // Must have legal moves
         int[][] tempGrid = gridLogic.getGrid();
 
@@ -33,24 +42,61 @@ public class Engine {
         }
         Collections.shuffle(ownPiecePositions);
 
-
+        Move defaultMove = new Move(-1,-1,-1,-1);
+        int hierarchy = 0;
         for (int[] pos : ownPiecePositions) {
-            int row = pos[0];
-            int col = pos[1];
-            int[][] moves = gridLogic.getValidPositions(row, col, turn);
+            int preRow = pos[0];
+            int preCol = pos[1];
+            int[][] moves = gridLogic.getValidPositions(preRow, preCol, turn);
 
             if (moves.length > 0) {
+                // Set defaultMove
+                if(defaultMove.preRow == -1){
+                    int index = random.nextInt(moves.length);
+                    defaultMove = new Move(preRow,preCol,moves[index][0],moves[index][1],tempGrid[preRow][preCol]);
+                }
 
-                int index =  random.nextInt(moves.length);
-                return new Move(row, col, moves[index][0], moves[index][1], tempGrid[row][col]);
+                // Check if a pawn is at promotion
+                Move pawnPromotionMove = evaluation.getPawnPromotionMove(moves,preRow,preCol,tempGrid);
+                if(pawnPromotionMove != null) return pawnPromotionMove;
+
+
+                // Check if there's a hanging piece
+                Move undefendedPieceDefendMove = evaluation.getUndefendedPieceDefendMove(moves,preRow,preCol,tempGrid);
+                if(undefendedPieceDefendMove != null){
+                    defaultMove = undefendedPieceDefendMove;
+                    hierarchy = 3;
+                }
+
+                // Check if there's an undefended piece to capture
+                if(hierarchy < 3) {
+                    Move captureUndefendedMove = evaluation.getCaptureUndefendedMove(moves, preRow, preCol, tempGrid);
+                    if (captureUndefendedMove != null) {
+                        defaultMove = captureUndefendedMove;
+                        hierarchy = 2;
+                    }
+                }
+
+                // Check if there's an advantageous capture
+                if(hierarchy < 2) {
+                    Move captureMove = evaluation.getCaptureMove(moves, preRow, preCol, tempGrid);
+                    if (captureMove != null) {
+                        defaultMove = captureMove;
+                        hierarchy = 1;
+                    }
+                }
+
+                // Check for safe moves
+                if(hierarchy < 1){
+                    Move safeMove = evaluation.getSafeMove(moves,preRow,preCol,tempGrid);
+                    if(safeMove != null) defaultMove = safeMove;
+                }
             }
         }
 
-        // Can't return null as there will be legal move
-        return null;
+        // defaultMove can't be unset as there will be legal move
+        return defaultMove;
     }
-
-
     public int getPawnPromotedPiece(int turn){
 
 
@@ -67,7 +113,7 @@ public class Engine {
             pieces[2] = logic.B_BISHOP;
             pieces[3] = logic.B_KNIGHT;
         }
-        int index = random.nextInt(4);
-        return pieces[index];
+        return pieces[0];
     }
+
 }

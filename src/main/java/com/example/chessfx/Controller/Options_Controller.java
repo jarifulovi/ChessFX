@@ -58,9 +58,11 @@ public class Options_Controller implements Initializable {
     private void setSoundStatus(){
         if(settings.isSound){
             soundToggleButton.setText("On");
+            soundToggleButton.setSelected(true);
         }
         else {
             soundToggleButton.setText("Off");
+            soundToggleButton.setSelected(false);
         }
     }
     private void setBackground(){
@@ -71,7 +73,7 @@ public class Options_Controller implements Initializable {
     private void setButtons(){
 
         // toggle button
-        soundToggleButton.setOnAction(event -> sountToggleOnAction());
+        soundToggleButton.setOnAction(event -> soundToggleOnAction());
         soundToggleButton.getStyleClass().add("toggle-button");
         // back button
         backButton.getStyleClass().add("button-29");
@@ -109,7 +111,7 @@ public class Options_Controller implements Initializable {
     private void backButtonOnAction(ActionEvent event){
         loadFXML.loadMenu(loadFXML.MENU_FXML,event,settings);
     }
-    private void sountToggleOnAction(){
+    private void soundToggleOnAction(){
 
         settings.isSound = soundToggleButton.isSelected();
         String text = (soundToggleButton.isSelected()) ? ("On") : ("Off");

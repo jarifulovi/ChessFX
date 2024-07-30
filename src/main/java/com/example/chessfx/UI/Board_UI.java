@@ -1,18 +1,21 @@
 package com.example.chessfx.UI;
 
 import com.example.chessfx.Logic.logic;
+import javafx.geometry.Insets;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 public class Board_UI {
 
      // Improvement : after same piece click the highlight remains
     private int[][] grid;
     private boolean[][] highLights;
-    private final String highLightColor = "#7FFFD4";
-    private final String highLightCaptures = "#8B0000";
-
+    private final Color HIGHLIGHT_NORMAL = Color.rgb(255, 255, 0, 0.6);
+    private final Color HIGHTLIGHT_CAPTURE = Color.rgb(255,50,50,0.6);
+    private final Color HIGHTLIGHT_OWNPIECE = Color.rgb(150,255,100,0.6);
     private String defaultColor;
 
     private Image[] images;
@@ -95,26 +98,37 @@ public class Board_UI {
 
         // For resetting
         if(!isChange){
-            String[] colors = defaultColor.split(" ");
-            int row = index/8;
-            int col = index%8;
-            String color = (row + col) % 2 == 0 ? colors[0] : colors[1];
-            square.setStyle(logic.BACKGROUND_CSS + color);
-
+            removeHighlightOverlay(square);
         }
         else{
 
-            //if(!logic.isOwnPiece(grid[index/8][index%8],turn)) {
-                if(logic.isOpponentPiece(grid[index/8][index%8],turn)){
-                    square.setStyle(logic.BACKGROUND_CSS + highLightCaptures);
-                }
-                else {
-                    square.setStyle(logic.BACKGROUND_CSS + highLightColor);
-                }
-            //}
+            if(logic.isOpponentPiece(grid[index/8][index%8],turn)){
+                highlightPane(square,HIGHTLIGHT_CAPTURE);
+            }
+            else {
+                highlightPane(square,HIGHLIGHT_NORMAL);
+            }
 
         }
 
+    }
+
+    public void highlightPane(StackPane pane,Color HIGHLIGHT_COLOR) {
+
+        Rectangle overlay = new Rectangle(pane.getWidth(), pane.getHeight(), HIGHLIGHT_COLOR);
+        overlay.setManaged(false); // Ensure it does not affect layout
+        overlay.setMouseTransparent(true); // Ensure it does not capture mouse events
+
+
+        overlay.widthProperty().bind(pane.widthProperty());
+        overlay.heightProperty().bind(pane.heightProperty());
+
+        // Add the overlay to the pane
+        pane.getChildren().add(0,overlay);
+    }
+    public void removeHighlightOverlay(StackPane pane) {
+        // Remove the overlay if it exists
+        pane.getChildren().removeIf(node -> node instanceof Rectangle);
     }
     public void setColor(StackPane[] squares,String color) {
         String[] colors = color.split(" ");

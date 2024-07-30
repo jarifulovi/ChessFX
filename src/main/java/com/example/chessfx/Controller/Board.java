@@ -7,6 +7,7 @@ import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -41,7 +42,9 @@ public class Board implements Initializable {
     public void initialize(URL url,ResourceBundle resourceBundle) {
 
         squares = boardPane.getChildren().toArray(StackPane[]::new);
-
+        boardPane.setOnMouseDragEntered(this::mouseDraggedEnter);
+        boardPane.setOnMouseDragged(this::mouseDragged);
+        boardPane.setOnMouseReleased(mouseEvent -> mouseReleased());
 
         int index = 0;
         for (StackPane square : squares) {
@@ -79,6 +82,15 @@ public class Board implements Initializable {
         // 2v2 or computer
         // Time constrains
         gamePlay.play(square, settings.gameType);
+    }
+    private void mouseDraggedEnter(MouseEvent mouseEvent){
+
+    }
+    private void mouseDragged(MouseEvent mouseEvent){
+
+    }
+    private void mouseReleased(){
+
     }
 
 

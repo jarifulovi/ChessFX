@@ -1,6 +1,5 @@
 package com.example.chessfx.Logic;
 
-import java.io.StringBufferInputStream;
 import java.util.Arrays;
 
 public abstract class logic {
@@ -135,7 +134,7 @@ public abstract class logic {
                 col += Character.getNumericValue(ch);
             }
             else if(Character.isLetter(ch)){
-                int piece = getPieceValue(ch);
+                int piece = getPieceNumber(ch);
                 grid[row][col] = piece;
                 col++;
             }
@@ -147,7 +146,7 @@ public abstract class logic {
         }
         return grid;
     }
-    private static int getPieceValue(char piece) {
+    private static int getPieceNumber(char piece) {
         // Map character to piece value
         switch (piece) {
             case 'p': return logic.B_PAWN;

@@ -111,23 +111,15 @@
 
 /* Style for ToggleButton when selected (toggled on) */
 .toggle-button:selected {
-    -fx-background-color: #2E7D32; /* Darker green for selected state */
-    -fx-border-color: #2E7D32; /* Matching border color */
+    -fx-background-color: #0C3710; /* Darker green for selected state */
+    -fx-border-color: #0C3710; /* Matching border color */
 }
 
 /* Style for ToggleButton on hover */
 .toggle-button:hover {
     -fx-background-color: #66BB6A; /* Lighter green for hover effect */
-    -fx-border-color: #66BB6A; /* Matching border color */
 }
 
-/* Style for ToggleButton when disabled */
-.toggle-button:disabled {
-    -fx-background-color: #A5D6A7; /* Light green for disabled state */
-    -fx-text-fill: #BDBDBD; /* Gray text color for disabled state */
-    -fx-border-color: #BDBDBD; /* Gray border for disabled state */
-    -fx-opacity: 0.6; /* Reduced opacity */
-}
 
 /* Focused state */
 .toggle-button:focused {
