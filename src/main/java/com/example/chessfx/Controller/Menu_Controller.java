@@ -1,8 +1,8 @@
 package com.example.chessfx.Controller;
 
-import com.example.chessfx.Logic.loadFXML;
-import com.example.chessfx.Logic.logic;
-import com.example.chessfx.UI.AssetLoader;
+import com.example.chessfx.Logic.Abstract.loadFXML;
+import com.example.chessfx.Logic.Abstract.logic;
+import com.example.chessfx.Logic.Abstract.AssetLoader;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -31,7 +31,7 @@ public class Menu_Controller implements Initializable {
         setButtons();
 
     }
-    // This invoked after loading fxml in options
+    // This method will invok after loading fxml in options
     // So it will first create a new Settings obj then initialize with the options one
     public void setSettings(Settings settings){
         this.settings = settings;
@@ -72,8 +72,7 @@ public class Menu_Controller implements Initializable {
         loadFXML.loadOptions(loadFXML.OPTIONS_FXML,event,settings);
     }
     private void aboutOnAction(ActionEvent event){
-        System.out.println("about us");
-        // a panel about the application
+        loadFXML.loadAbout(loadFXML.ABOUT_FXML,event,settings);
     }
     private void exitOnAction(){
         Platform.exit();

@@ -1,4 +1,4 @@
-package com.example.chessfx.Logic;
+package com.example.chessfx.Logic.Abstract;
 
 import java.util.Arrays;
 
@@ -69,13 +69,7 @@ public abstract class logic {
     public static boolean isStraight(int row1, int col1, int row2, int col2) {
         return row1 == row2 || col1 == col2;
     }
-    public static boolean isWithinPosition(int[][] positions,int[] targetPos){
 
-        for(int[] pos : positions){
-            if(pos[0] == targetPos[0] && pos[1] == targetPos[1]) return true;
-        }
-        return false;
-    }
     public static boolean isPawnPromoting(int piece,int turn,int player,int newRow){
 
         if(piece == logic.W_PAWN || piece == logic.B_PAWN){
@@ -148,21 +142,21 @@ public abstract class logic {
     }
     private static int getPieceNumber(char piece) {
         // Map character to piece value
-        switch (piece) {
-            case 'p': return logic.B_PAWN;
-            case 'r': return logic.B_ROOK;
-            case 'n': return logic.B_KNIGHT;
-            case 'b': return logic.B_BISHOP;
-            case 'q': return logic.B_QUEEN;
-            case 'k': return logic.B_KING;
-            case 'P': return logic.W_PAWN;
-            case 'R': return logic.W_ROOK;
-            case 'N': return logic.W_KNIGHT;
-            case 'B': return logic.W_BISHOP;
-            case 'Q': return logic.W_QUEEN;
-            case 'K': return logic.W_KING;
-            default: return logic.NO_PIECE;
-        }
+        return switch (piece) {
+            case 'p' -> logic.B_PAWN;
+            case 'r' -> logic.B_ROOK;
+            case 'n' -> logic.B_KNIGHT;
+            case 'b' -> logic.B_BISHOP;
+            case 'q' -> logic.B_QUEEN;
+            case 'k' -> logic.B_KING;
+            case 'P' -> logic.W_PAWN;
+            case 'R' -> logic.W_ROOK;
+            case 'N' -> logic.W_KNIGHT;
+            case 'B' -> logic.W_BISHOP;
+            case 'Q' -> logic.W_QUEEN;
+            case 'K' -> logic.W_KING;
+            default -> logic.NO_PIECE;
+        };
     }
 
     public static int[][] setGridPC(String FEN){

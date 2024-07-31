@@ -1,7 +1,7 @@
 package com.example.chessfx.UI;
 
-import com.example.chessfx.Logic.logic;
-import javafx.geometry.Insets;
+import com.example.chessfx.Logic.Abstract.AssetLoader;
+import com.example.chessfx.Logic.Abstract.logic;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;

@@ -1,6 +1,6 @@
 package com.example.chessfx.Controller;
 
-import com.example.chessfx.Logic.logic;
+import com.example.chessfx.Logic.Abstract.logic;
 
 
 // Settings will be created in Menu Controller

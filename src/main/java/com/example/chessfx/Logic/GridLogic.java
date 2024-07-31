@@ -1,6 +1,8 @@
 package com.example.chessfx.Logic;
 
 
+import com.example.chessfx.Logic.Abstract.logic;
+
 public class GridLogic {
 
     private int[][] grid;
@@ -84,14 +86,6 @@ public class GridLogic {
 
         // Update castling
         pieceLogic.updateCastling(grid,player,piece,preRow,preCol,newRow,newCol);
-    }
-
-
-    // For debugging
-    public static void main(String[] args) {
-
-        GridLogic gridLogic = new GridLogic(1);
-        logic.display(gridLogic.grid);
     }
 
 }

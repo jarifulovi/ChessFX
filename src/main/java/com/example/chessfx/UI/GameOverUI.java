@@ -1,7 +1,7 @@
 package com.example.chessfx.UI;
 
 import com.example.chessfx.Controller.Settings;
-import com.example.chessfx.Logic.loadFXML;
+import com.example.chessfx.Logic.Abstract.loadFXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;

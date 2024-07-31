@@ -1,5 +1,7 @@
 package com.example.chessfx.Logic;
 
+import com.example.chessfx.Logic.Abstract.logic;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

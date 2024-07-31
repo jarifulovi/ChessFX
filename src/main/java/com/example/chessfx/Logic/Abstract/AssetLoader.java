@@ -1,4 +1,4 @@
-package com.example.chessfx.UI;
+package com.example.chessfx.Logic.Abstract;
 
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
@@ -11,6 +11,7 @@ public abstract class AssetLoader {
     public static String menuBackgroundPath = "/com/example/chessfx/Images/Background/menuBackground.png";
     public static String playBackgroundPath = "/com/example/chessfx/Images/Background/playBackground.png";
     public static String tileBasePath = "/com/example/chessfx/Images/Tiles/";
+    public static String appIconPath = "/com/example/chessfx/Images/Icons/app_icon.png";
     public static Image[] loadPieceImage(){
 
         String pieceBasePath = "/com/example/chessfx/Images/Pieces/";

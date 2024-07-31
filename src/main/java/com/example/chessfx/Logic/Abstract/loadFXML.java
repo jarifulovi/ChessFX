@@ -1,4 +1,4 @@
-package com.example.chessfx.Logic;
+package com.example.chessfx.Logic.Abstract;
 
 import com.example.chessfx.Controller.*;
 import com.example.chessfx.application;
@@ -18,11 +18,34 @@ public abstract class loadFXML {
     public static String OPTIONS_FXML = "options.fxml";
     public static String PLAY_FXML = "play.fxml";
     public static String GAME_FXML = "board.fxml";
+    public static String ABOUT_FXML = "about.fxml";
     public static String CSS_FILE = "buttonUI.css";
 
     public static void addCSSInScene(Scene scene){
         String cssPath = loadFXML.CSS_FILE;
         scene.getStylesheets().add(Objects.requireNonNull(application.class.getResource(cssPath)).toExternalForm());
+    }
+    public static void loadAbout(String fxmlFile, ActionEvent event,Settings settings) {
+        try {
+            FXMLLoader loader = new FXMLLoader(application.class.getResource(fxmlFile));
+            Parent root = loader.load();
+
+            // Obtain the controller and set the settings
+            About_Controller controller = loader.getController();
+            if (controller != null) {
+                controller.setSettings(settings);
+            }
+            // take the obj and use obj.setSettings(settings)
+            Scene scene = new Scene(root);
+            addCSSInScene(scene);
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(scene);
+            stage.setTitle("Chess FX");
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     public static void loadOptions(String fxmlFile, ActionEvent event,Settings settings) {
         try {

@@ -1,19 +1,22 @@
 package com.example.chessfx.Controller;
 import com.example.chessfx.Logic.*;
 
+import com.example.chessfx.Logic.Abstract.loadFXML;
+import com.example.chessfx.Logic.Abstract.logic;
 import com.example.chessfx.UI.GameOverUI;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
+import javafx.event.ActionEvent;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -23,9 +26,10 @@ public class Board implements Initializable {
     public AnchorPane anchorPane;
     @FXML
     public GridPane boardPane;
-
     @FXML
     public Label opponentTimerLabel,ownTimerLabel;
+    @FXML
+    public Button restartButton,resignButton;
     public StackPane[] squares;
 
     private GamePlay gamePlay;
@@ -35,16 +39,12 @@ public class Board implements Initializable {
 
     // This fields will be set by the parent
     private Settings settings;
-    private String defaultColor;
     private boolean isSound;
 
     @Override
     public void initialize(URL url,ResourceBundle resourceBundle) {
 
         squares = boardPane.getChildren().toArray(StackPane[]::new);
-        boardPane.setOnMouseDragEntered(this::mouseDraggedEnter);
-        boardPane.setOnMouseDragged(this::mouseDragged);
-        boardPane.setOnMouseReleased(mouseEvent -> mouseReleased());
 
         int index = 0;
         for (StackPane square : squares) {
@@ -57,19 +57,17 @@ public class Board implements Initializable {
     public void setSettings(Settings settings){
         this.settings = settings;
         isSound = settings.isSound;
-        if(settings.boardType == logic.GREEN_BOARD) defaultColor = "white "+logic.FOREST_GREEN;
-        else if(settings.boardType == logic.BROWN_BOARD) defaultColor = "white "+logic.BROWN;
-        else if(settings.boardType == logic.BLACK_BOARD) defaultColor = "white "+logic.GRAY;
 
         init_gamePlay();
     }
     private void init_gamePlay(){
         setBackground();
+        setButtons();
         if(settings.duration > 0) {
             time = new Time(settings.duration);
         }
         setTimeLine();
-        gamePlay = new GamePlay(boardPane,squares, time,defaultColor, settings.player, settings.gameType);
+        gamePlay = new GamePlay(boardPane,squares,time,settings);
         System.out.println("Time : "+settings.duration);
         System.out.println("Player : "+settings.player);
         System.out.println("GameType : "+settings.gameType);
@@ -80,19 +78,15 @@ public class Board implements Initializable {
 
         // According to game
         // 2v2 or computer
-        // Time constrains
+        // Time control
         gamePlay.play(square, settings.gameType);
     }
-    private void mouseDraggedEnter(MouseEvent mouseEvent){
-
+    private void restartOnAction(ActionEvent event){
+        loadFXML.loadGame(loadFXML.GAME_FXML,event,settings);
     }
-    private void mouseDragged(MouseEvent mouseEvent){
-
+    private void resignButtonOnAction(ActionEvent event){
+        gamePlay.getResign();
     }
-    private void mouseReleased(){
-
-    }
-
 
     private void setTimeLine() {
         // Initialize the timeline
@@ -100,11 +94,11 @@ public class Board implements Initializable {
             // Update the timer labels
             if (settings.duration > 0) {
                 if (settings.player == logic.WHITE) {
-                    ownTimerLabel.setText(String.valueOf(time.getWhiteTime()));
-                    opponentTimerLabel.setText(String.valueOf(time.getBlackTime()));
+                    ownTimerLabel.setText(String.valueOf(time.getRemainingTime(time.getWhiteTime())));
+                    opponentTimerLabel.setText(String.valueOf(time.getRemainingTime(time.getBlackTime())));
                 } else {
-                    ownTimerLabel.setText(String.valueOf(time.getBlackTime()));
-                    opponentTimerLabel.setText(String.valueOf(time.getWhiteTime()));
+                    ownTimerLabel.setText(String.valueOf(time.getRemainingTime(time.getBlackTime())));
+                    opponentTimerLabel.setText(String.valueOf(time.getRemainingTime(time.getWhiteTime())));
                 }
             }
 
@@ -143,5 +137,12 @@ public class Board implements Initializable {
             }
         }
     }
+    private void setButtons(){
+        restartButton.setOnAction(this::restartOnAction);
+        restartButton.getStyleClass().add("button-19");
 
+        resignButton.setOnAction(this::resignButtonOnAction);
+        resignButton.getStyleClass().add("button-19");
+
+    }
 }

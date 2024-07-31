@@ -1,9 +1,11 @@
 package com.example.chessfx;
 
-import com.example.chessfx.Logic.loadFXML;
+import com.example.chessfx.Logic.Abstract.loadFXML;
+import com.example.chessfx.Logic.Abstract.AssetLoader;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -17,6 +19,8 @@ public class application extends Application {
         loadFXML.addCSSInScene(scene);
 
         stage.setTitle("ChessFX");
+        Image icon = AssetLoader.getImage(AssetLoader.appIconPath);
+        stage.getIcons().add(icon);
         stage.setScene(scene);
         stage.show();
     }

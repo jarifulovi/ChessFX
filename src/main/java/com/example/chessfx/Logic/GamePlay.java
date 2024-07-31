@@ -1,5 +1,7 @@
 package com.example.chessfx.Logic;
 
+import com.example.chessfx.Controller.Settings;
+import com.example.chessfx.Logic.Abstract.logic;
 import com.example.chessfx.Logic.Engine.Engine;
 import com.example.chessfx.Logic.Engine.Move;
 import com.example.chessfx.UI.Board_UI;
@@ -33,15 +35,20 @@ public class GamePlay {
     String gameOverText;
 
 
-    public GamePlay(GridPane boardPane, StackPane[] squares, Time time, String defaultColor, int player, int gameType){
+    public GamePlay(GridPane boardPane, StackPane[] squares, Time time,Settings settings){
         // set board grid logic and ui
         this.squares = squares;
         this.time = time;
         this.gameOverText = "GameOver";
         init_timer();
 
-        this.player = player;
-        this.gameType = gameType;
+        this.player = settings.player;
+        this.gameType = settings.gameType;
+        String defaultColor = "";
+        if(settings.boardType == logic.GREEN_BOARD) defaultColor = "white "+logic.FOREST_GREEN;
+        else if(settings.boardType == logic.BROWN_BOARD) defaultColor = "white "+logic.BROWN;
+        else if(settings.boardType == logic.BLACK_BOARD) defaultColor = "white "+logic.GRAY;
+
         this.firstClick = false;
         gridLogic = new GridLogic(player);
         board_ui = new Board_UI(gridLogic.getGrid(),squares,defaultColor);
@@ -81,6 +88,14 @@ public class GamePlay {
             System.out.println("Game over!");
         }
         return gameOver;
+    }
+    public void getResign(){
+        if(turn == logic.WHITE)
+            gameOverText = "Black wins";
+        else
+            gameOverText = "White wins";
+
+        gameOver = true;
     }
     private void myTurn(int row,int col){
 

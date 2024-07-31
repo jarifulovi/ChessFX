@@ -1,8 +1,8 @@
 package com.example.chessfx.Controller;
 
-import com.example.chessfx.Logic.loadFXML;
-import com.example.chessfx.Logic.logic;
-import com.example.chessfx.UI.AssetLoader;
+import com.example.chessfx.Logic.Abstract.loadFXML;
+import com.example.chessfx.Logic.Abstract.logic;
+import com.example.chessfx.Logic.Abstract.AssetLoader;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;

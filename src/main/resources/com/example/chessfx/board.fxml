@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -106,15 +107,17 @@
             <StackPane prefHeight="60.0" prefWidth="60.0" GridPane.columnIndex="7" GridPane.rowIndex="7" />
          </children>
       </GridPane>
-      <Label fx:id="opponentTimerLabel" layoutX="505.0" layoutY="219.0" prefHeight="60.0" prefWidth="150.0">
+      <Label fx:id="opponentTimerLabel" layoutX="506.0" layoutY="270.0" prefHeight="60.0" prefWidth="150.0">
          <font>
             <Font size="37.0" />
          </font>
       </Label>
-      <Label fx:id="ownTimerLabel" layoutX="505.0" layoutY="289.0" prefHeight="60.0" prefWidth="150.0">
+      <Label fx:id="ownTimerLabel" layoutX="505.0" layoutY="350.0" prefHeight="60.0" prefWidth="150.0">
          <font>
             <Font size="37.0" />
          </font>
       </Label>
+      <Button fx:id="restartButton" layoutX="545.0" layoutY="200.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="84.0" text="Restart" />
+      <Button fx:id="resignButton" layoutX="545.0" layoutY="130.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="84.0" text="Resign" />
    </children>
 </AnchorPane>

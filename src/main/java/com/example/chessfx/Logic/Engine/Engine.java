@@ -1,7 +1,7 @@
 package com.example.chessfx.Logic.Engine;
 
 import com.example.chessfx.Logic.GridLogic;
-import com.example.chessfx.Logic.logic;
+import com.example.chessfx.Logic.Abstract.logic;
 
 import java.util.*;
 
