@@ -43,65 +43,10 @@ public class IllegalMove {
         tempGrid[preRow][preCol] = logic.NO_PIECE;
         tempGrid[newRow][newCol] = piece;
 
-        //int[][] allAttackedPositions = getAllAttackSquare(tempGrid,turn,player,false);
-        //int[] kingPosition = logic.getKingPosition(tempGrid,turn);
 
-        //return logic.isWithinPosition(allAttackedPositions,kingPosition);
         return logic.isKingInCheck(tempGrid,turn,player);
     }
 
-
-    // Turn indicate who is playing the move
-    // Not works for castling and en passant
-    private int[][] getAllAttackSquare(int[][] grid,int turn,int player,boolean isCastling){
-
-        List<int[]> validPositions = new ArrayList<>();
-
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                int piece = grid[i][j];
-                if (logic.isOpponentPiece(piece, turn)) {
-                    // Get valid moves for opponent piece
-                    int[][] potentialMoves = new int[0][0];
-
-                    if(piece == logic.B_KNIGHT || piece == logic.W_KNIGHT){
-                        potentialMoves = logic.validKnightSquares(i,j,grid,turn);
-                    }
-                    else if(piece == logic.B_ROOK || piece == logic.W_ROOK){
-                        potentialMoves = logic.validRookSquares(i,j,turn,grid);
-                    }
-                    else if(piece == logic.B_BISHOP || piece == logic.W_BISHOP){
-                        potentialMoves = logic.validBishopSquares(i,j,turn,grid);
-                    }
-                    else if(piece == logic.B_QUEEN || piece == logic.W_QUEEN){
-                        potentialMoves = logic.validQueenSquares(i,j,turn,grid);
-                    }
-
-                    // Only check when not checking castling right
-                    if(!isCastling){
-                        if(piece == logic.W_KING || piece == logic.B_KING){
-                            potentialMoves = logic.validKingAttackSquares(i,j);
-                        }
-                        else if(piece == logic.W_PAWN || piece == logic.B_PAWN){
-                            potentialMoves = logic.validPawnAttackSquares(turn,player,i,j);
-
-                        }
-                    }
-
-                    validPositions.addAll(Arrays.asList(potentialMoves));
-                }
-            }
-        }
-
-        // Convert list to 2D array if needed
-        int[][] validPositionsArray = new int[validPositions.size()][2];
-        int index = 0;
-        for (int[] position : validPositions) {
-            validPositionsArray[index++] = position;
-        }
-
-        return validPositionsArray;
-    }
 
     private boolean checkCastleIllegal(int[][] grid,int turn,int player,int preRow,int preCol,int newRow,int newCol){
 

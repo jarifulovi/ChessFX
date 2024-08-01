@@ -1,4 +1,4 @@
-package com.example.chessfx.Logic;
+package com.example.chessfx.Logic.Other;
 
 public class Time {
     private long startTime1;

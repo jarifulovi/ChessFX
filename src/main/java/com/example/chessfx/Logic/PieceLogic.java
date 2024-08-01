@@ -9,21 +9,14 @@ import java.util.List;
 public class PieceLogic {
 
     private IllegalMove illegalMove;
-    public boolean isEnPassantCapture;
     private int player;
 
     private int[][] gridPC;  // This keeps en passant and castling positions
-    public boolean notWhiteLeftCastle,notWhiteRightCastle,notBlackLeftCastle,notBlackRightCastle;
 
     public PieceLogic(int player,String FEN){
         illegalMove = new IllegalMove();
         gridPC = logic.setGridPC(FEN);
         this.player = player;
-        isEnPassantCapture = false;
-        notWhiteLeftCastle = true;
-        notWhiteRightCastle = true;
-        notBlackLeftCastle = true;
-        notBlackRightCastle = true;
     }
 
     // Only pawns doesn't take own piece positions

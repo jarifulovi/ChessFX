@@ -3,6 +3,7 @@ import com.example.chessfx.Logic.*;
 
 import com.example.chessfx.Logic.Abstract.loadFXML;
 import com.example.chessfx.Logic.Abstract.logic;
+import com.example.chessfx.Logic.Other.Time;
 import com.example.chessfx.UI.GameOverUI;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -39,7 +40,6 @@ public class Game_Controller implements Initializable {
 
     // This fields will be set by the parent
     private Settings settings;
-    private boolean isSound;
 
     @Override
     public void initialize(URL url,ResourceBundle resourceBundle) {
@@ -56,7 +56,6 @@ public class Game_Controller implements Initializable {
     }
     public void setSettings(Settings settings){
         this.settings = settings;
-        isSound = settings.isSound;
 
         init_gamePlay();
     }

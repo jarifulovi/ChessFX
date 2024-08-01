@@ -4,9 +4,10 @@ import com.example.chessfx.Controller.Settings;
 import com.example.chessfx.Logic.Abstract.logic;
 import com.example.chessfx.Logic.Engine.Engine;
 import com.example.chessfx.Logic.Engine.Move;
+import com.example.chessfx.Logic.Other.Time;
 import com.example.chessfx.UI.Board_UI;
 import com.example.chessfx.UI.PawnPromotion;
-import com.example.chessfx.UI.SoundSetup;
+import com.example.chessfx.Logic.Other.SoundSetup;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 
@@ -22,6 +23,7 @@ public class GamePlay {
     private StackPane[] squares;
     private Time time;      // Time can be null
     private boolean hasTime;
+    private boolean hasSound;
     private int player;
     private int gameType;
     private int turn = logic.WHITE;
@@ -44,6 +46,7 @@ public class GamePlay {
 
         this.player = settings.player;
         this.gameType = settings.gameType;
+        this.hasSound = settings.isSound;
         String defaultColor = "";
         if(settings.boardType == logic.GREEN_BOARD) defaultColor = "white "+logic.FOREST_GREEN;
         else if(settings.boardType == logic.BROWN_BOARD) defaultColor = "white "+logic.BROWN;
@@ -205,7 +208,9 @@ public class GamePlay {
 
 
         checkMoveAndReset();
-        computerTurn();
+        if(gameType == logic.ONE_PLAYER){
+            computerTurn();
+        }
     }
     public void play(StackPane square,int gameType){
 
@@ -232,11 +237,9 @@ public class GamePlay {
 
         turn = (turn == logic.WHITE) ? logic.BLACK : logic.WHITE;
 
-
-        if(turn == player)
-            soundSetup.startMusic(true,isCapture,isCastle);
-        else
-            soundSetup.startMusic(false,isCapture,isCastle);
+        if(hasSound) {
+            soundSetup.startMusic(turn == player, isCapture, isCastle);
+        }
 
         if(hasTime) {
             updateTimer();

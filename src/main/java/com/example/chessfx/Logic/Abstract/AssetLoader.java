@@ -1,6 +1,7 @@
 package com.example.chessfx.Logic.Abstract;
 
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 
 import java.util.Objects;
@@ -35,7 +36,7 @@ public abstract class AssetLoader {
         int index = 0;
         for(String path : imagePaths){
             if(!path.isEmpty()){
-                images[index] = new Image(Objects.requireNonNull(AssetLoader.class.getResourceAsStream(path)));
+                images[index] = getImage(path);
             }
             index++;
         }
@@ -57,10 +58,11 @@ public abstract class AssetLoader {
         );
         return new Background(backgroundImage);
     }
-    public static Image[] getPawnPromotionImage(String color){
+    public static ImageView[] getPawnPromotionImage(String color){
 
         String pieceBasePath = "/com/example/chessfx/Images/Pieces/";
         Image[] images = new Image[4];
+        ImageView[] imageViews = new ImageView[4];
 
         String[] stringPaths = {
                 pieceBasePath + color + "-knight.png",
@@ -71,9 +73,13 @@ public abstract class AssetLoader {
 
         int index = 0;
         for(String path : stringPaths){
-            images[index] = new Image(Objects.requireNonNull(AssetLoader.class.getResourceAsStream(path)));
+            images[index] = getImage(path);
+            imageViews[index] = new ImageView(images[index]);
+            imageViews[index].setFitWidth(60.0);
+            imageViews[index].setFitHeight(60.0);
             index++;
         }
-        return images;
+
+        return imageViews;
     }
 }

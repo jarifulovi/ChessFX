@@ -1,4 +1,4 @@
-package com.example.chessfx.UI;
+package com.example.chessfx.Logic.Other;
 
 
 import javax.sound.sampled.AudioInputStream;

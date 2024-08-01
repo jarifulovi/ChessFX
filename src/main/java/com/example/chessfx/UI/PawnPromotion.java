@@ -13,8 +13,8 @@ public class PawnPromotion {
     private GridPane boardPane;
     private StackPane[] promotedSquares;    // knight bishop queen rook
 
-    private Image[] whitePieceImages;
-    private Image[] blackPieceImages;
+    private ImageView[] whitePieceImages;
+    private ImageView[] blackPieceImages;
     public PawnPromotion(GridPane boardPane){
         this.boardPane = boardPane;
         this.promotedSquares = new StackPane[4];
@@ -91,7 +91,7 @@ public class PawnPromotion {
     // Whose promoting pawn
     private void setImage(int turn){
 
-        Image[] images;
+        ImageView[] images;
 
         if(turn == logic.WHITE){
             images = whitePieceImages;
@@ -103,14 +103,10 @@ public class PawnPromotion {
         int index = 0;
         for(StackPane square : promotedSquares){
 
-            ImageView imageView = new ImageView(images[index]);
-            imageView.setFitWidth(square.prefWidthProperty().doubleValue());
-            imageView.setFitHeight(square.prefHeightProperty().doubleValue());
-
             if(!square.getChildren().isEmpty())
                 square.getChildren().clear();
 
-            square.getChildren().add(imageView);
+            square.getChildren().add(images[index]);
             index++;
         }
     }

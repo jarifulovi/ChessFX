@@ -262,8 +262,8 @@ public class Board_UI {
 
         ImageView imageView = new ImageView(images[piece]);
 
-        imageView.setFitWidth(square.prefWidthProperty().doubleValue());
-        imageView.setFitHeight(square.prefHeightProperty().doubleValue());
+        imageView.setFitWidth(60.0);
+        imageView.setFitHeight(60.0);
 
         if(!square.getChildren().isEmpty())
             square.getChildren().clear();

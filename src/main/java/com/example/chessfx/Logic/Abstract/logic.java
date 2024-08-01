@@ -259,49 +259,6 @@ public abstract class logic {
         return logic.validSquaresInDirection(row,col,turn,grid,rowOffsets,colOffsets);
     }
 
-    public static int[][] validKingAttackSquares(int row,int col){
-
-        int[][] validSquares = new int[8][2];
-        int validSquareCount = 0;
-
-        int[] rowOffsets = {0, 0, 1, 1, 1,-1, -1,-1};
-        int[] colOffsets = {1,-1, 1,-1, 0, 1, -1, 0};
-
-        for(int i=0;i<rowOffsets.length;i++){
-            int newRow = row + rowOffsets[i];
-            int newCol = col + colOffsets[i];
-
-            if(isWithinBoard(newRow,newCol)){
-                validSquares[validSquareCount][0] = newRow;
-                validSquares[validSquareCount][1] = newCol;
-                validSquareCount++;
-            }
-        }
-        return Arrays.copyOf(validSquares,validSquareCount);
-    }
-    public static int[][] validPawnAttackSquares(int turn,int player,int row,int col){
-
-        int[][] validSquares = new int[2][2];
-        int validSquareCount = 0;
-
-        int forwardDirection = ( turn != player ) ? -1 : 1;
-        int newRow = row + forwardDirection;
-        int newColLeft = col - 1;
-        int newColRight = col + 1;
-
-        if(isWithinBoard(newRow,newColLeft)){
-            validSquares[validSquareCount][0] = newRow;
-            validSquares[validSquareCount][1] = newColLeft;
-            validSquareCount++;
-        }
-        if(isWithinBoard(newRow,newColRight)){
-            validSquares[validSquareCount][0] = newRow;
-            validSquares[validSquareCount][1] = newColRight;
-            validSquareCount++;
-        }
-        return Arrays.copyOf(validSquares,validSquareCount);
-    }
-
     public static boolean isKingInCheck(int[][] grid,int turn,int player){
 
         int[] kingPos = logic.getKingPosition(grid,turn);
