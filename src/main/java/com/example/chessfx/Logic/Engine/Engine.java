@@ -62,10 +62,12 @@ public class Engine {
 
 
                 // Check if there's a hanging piece
-                Move undefendedPieceDefendMove = evaluation.getUndefendedPieceDefendMove(moves,preRow,preCol,tempGrid);
-                if(undefendedPieceDefendMove != null){
-                    defaultMove = undefendedPieceDefendMove;
-                    hierarchy = 3;
+                if(hierarchy < 4) {
+                    Move undefendedPieceDefendMove = evaluation.getUndefendedPieceDefendMove(moves, preRow, preCol, tempGrid);
+                    if (undefendedPieceDefendMove != null) {
+                        defaultMove = undefendedPieceDefendMove;
+                        hierarchy = 4;
+                    }
                 }
 
                 // Check if there's an undefended piece to capture
@@ -73,7 +75,7 @@ public class Engine {
                     Move captureUndefendedMove = evaluation.getCaptureUndefendedMove(moves, preRow, preCol, tempGrid);
                     if (captureUndefendedMove != null) {
                         defaultMove = captureUndefendedMove;
-                        hierarchy = 2;
+                        hierarchy = 3;
                     }
                 }
 
@@ -82,7 +84,7 @@ public class Engine {
                     Move captureMove = evaluation.getCaptureMove(moves, preRow, preCol, tempGrid);
                     if (captureMove != null) {
                         defaultMove = captureMove;
-                        hierarchy = 1;
+                        hierarchy = 2;
                     }
                 }
 
@@ -90,6 +92,7 @@ public class Engine {
                 if(hierarchy < 1){
                     Move safeMove = evaluation.getSafeMove(moves,preRow,preCol,tempGrid);
                     if(safeMove != null) defaultMove = safeMove;
+                    hierarchy = 1;
                 }
             }
         }

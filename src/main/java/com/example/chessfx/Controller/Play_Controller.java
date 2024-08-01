@@ -45,6 +45,9 @@ public class Play_Controller implements Initializable {
     }
     public void setSettings(Settings settings){
         this.settings = settings;
+        // some default settings
+        settings.player = logic.WHITE;
+        settings.duration = 0;
     }
     private void setBackground(){
         anchorPane.setStyle(logic.BACKGROUND_CSS+logic.GRAY);

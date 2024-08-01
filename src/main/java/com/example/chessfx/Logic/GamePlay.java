@@ -74,8 +74,14 @@ public class GamePlay {
     public boolean checkGameOver(){
 
         boolean timeEnd = false;
-        if(hasTime) timeEnd = (turn==logic.WHITE) ? (time.isTimeOver(time.getWhiteTime())) :
-                (time.isTimeOver(time.getBlackTime()));
+        if(hasTime){
+            timeEnd = (turn==logic.WHITE) ? (time.isTimeOver(time.getWhiteTime())) :
+                    (time.isTimeOver(time.getBlackTime()));
+
+            if(timeEnd) {
+                gameOverText = (turn==logic.WHITE) ? ("Black Wins") : ("White Wins");
+            }
+        }
 
         gameOver = gameOver || timeEnd;
         if(gameOver){
@@ -83,9 +89,8 @@ public class GamePlay {
             if(hasTime){
                 time.stopWhite();
                 time.stopBlack();
-                gameOverText = (turn==logic.WHITE) ? ("Black Wins") : ("White Wins");
+
             }
-            System.out.println("Game over!");
         }
         return gameOver;
     }
@@ -115,7 +120,7 @@ public class GamePlay {
 
             if(positions.length > 0){
                 firstClick = true;
-                board_ui.highLightSquare(positions,turn,squares);
+                board_ui.highLightSquares(positions,turn,squares);
             }
 
             logic.displayTime(startTime);
@@ -220,11 +225,18 @@ public class GamePlay {
     }
     private void update(int piece,int preRow,int preCol,int row,int col){
 
+        boolean isCapture = (gridLogic.clickPiece(row,col) != logic.NO_PIECE);
+        boolean isCastle = logic.isCastle(piece,preCol,col);
         gridLogic.updateGrid(player,piece,preRow,preCol,row,col);
         board_ui.updateUI(squares,gridLogic.getGrid(),preRow,preCol,row,col);
 
         turn = (turn == logic.WHITE) ? logic.BLACK : logic.WHITE;
-        System.out.println(logic.isKingInCheck(gridLogic.getGrid(),turn,player));
+
+
+        if(turn == player)
+            soundSetup.startMusic(true,isCapture,isCastle);
+        else
+            soundSetup.startMusic(false,isCapture,isCastle);
 
         if(hasTime) {
             updateTimer();
@@ -241,6 +253,10 @@ public class GamePlay {
             gameOver = true;
         }
 
+        // If provide a check then update check ui
+        if(check){
+            board_ui.checkedKingColor(squares,turn);
+        }
         // Check-mate or stale-mate checking
         if(gridLogic.noValidSquareForOpponent(gridLogic.getGrid(),turn)){
 

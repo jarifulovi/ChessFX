@@ -20,7 +20,7 @@ import javafx.event.ActionEvent;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class Board implements Initializable {
+public class Game_Controller implements Initializable {
 
     @FXML
     public AnchorPane anchorPane;
@@ -93,12 +93,15 @@ public class Board implements Initializable {
         timeline = new Timeline(new KeyFrame(Duration.seconds(0.5), event -> {
             // Update the timer labels
             if (settings.duration > 0) {
+
+                String whiteTime = String.format("%.2f",time.getRemainingTime(time.getWhiteTime()));
+                String blackTime = String.format("%.2f",time.getRemainingTime(time.getBlackTime()));
                 if (settings.player == logic.WHITE) {
-                    ownTimerLabel.setText(String.valueOf(time.getRemainingTime(time.getWhiteTime())));
-                    opponentTimerLabel.setText(String.valueOf(time.getRemainingTime(time.getBlackTime())));
+                    ownTimerLabel.setText(whiteTime);
+                    opponentTimerLabel.setText(blackTime);
                 } else {
-                    ownTimerLabel.setText(String.valueOf(time.getRemainingTime(time.getBlackTime())));
-                    opponentTimerLabel.setText(String.valueOf(time.getRemainingTime(time.getWhiteTime())));
+                    ownTimerLabel.setText(blackTime);
+                    opponentTimerLabel.setText(whiteTime);
                 }
             }
 

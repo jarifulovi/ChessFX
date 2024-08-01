@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorPane" prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.chessfx.Controller.Board">
+<AnchorPane fx:id="anchorPane" prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.chessfx.Controller.Game_Controller">
    <children>
       <GridPane fx:id="boardPane" layoutY="79.0" prefHeight="480.0" prefWidth="480.0">
         <columnConstraints>

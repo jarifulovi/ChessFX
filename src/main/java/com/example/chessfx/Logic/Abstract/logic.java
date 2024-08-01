@@ -46,7 +46,6 @@ public abstract class logic {
     public static String GRAY = "#4b4847";
     public static String DIM_GRAY = "#696969";
     public static String BROWN = "#ab8149";
-    public static String BLUE_BUTTON = "#1899D6";
 
     public static String BLACK_COLOR = "#000000";
     public static String WHITE_COLOR = "#ffffff";
@@ -498,6 +497,9 @@ public abstract class logic {
             }
         }
         return new int[]{0, 0};
+    }
+    public static boolean isCastle(int piece,int preCol,int newCol){
+        return ((piece == W_KING || piece == B_KING) && (Math.abs(preCol - newCol) == 2));
     }
     public static int[][] copyGrid(int[][] grid){
 

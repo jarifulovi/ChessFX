@@ -17,7 +17,7 @@ public abstract class loadFXML {
     public static String MENU_FXML = "menu.fxml";
     public static String OPTIONS_FXML = "options.fxml";
     public static String PLAY_FXML = "play.fxml";
-    public static String GAME_FXML = "board.fxml";
+    public static String GAME_FXML = "game.fxml";
     public static String ABOUT_FXML = "about.fxml";
     public static String CSS_FILE = "buttonUI.css";
 
@@ -119,7 +119,7 @@ public abstract class loadFXML {
             Parent root = loader.load();
 
 
-            Board controller = loader.getController();
+            Game_Controller controller = loader.getController();
             if (controller != null) {
                 controller.setSettings(settings);
             }
