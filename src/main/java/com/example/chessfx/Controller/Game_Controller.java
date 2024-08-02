@@ -11,6 +11,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -32,7 +35,9 @@ public class Game_Controller implements Initializable {
     @FXML
     public Button restartButton,resignButton;
     public StackPane[] squares;
-
+    private ImageView movingPieceImage;
+    private double startX,startY;
+    private final double DRAGGED_THREESHOLD = 20.0;
     private GamePlay gamePlay;
     private GameOverUI gameOverUI;
     private Time time;   // Time only work when time is > 0 meaning the game has time odds
@@ -49,11 +54,82 @@ public class Game_Controller implements Initializable {
         int index = 0;
         for (StackPane square : squares) {
             square.setId(String.valueOf(index));
-            square.setOnMouseClicked(mouseEvent -> mouseClick(square));
+            square.setOnMousePressed(mouseEvent -> mousePressed(mouseEvent,square));
             index++;
         }
 
+        boardPane.setOnMousePressed(this::mouseDragPressed);
+        // When the drag is in progress in anchorPane
+        boardPane.setOnMouseDragged(this::mouseDragged);
+        // When drag or click released
+        boardPane.setOnMouseReleased(this::mouseDragRelease);
+
     }
+    // This method will invoke when dragging initiated
+    // Has no functionality for gamePlay
+    // Mouse pressed will be also invoked along it
+    private void mouseDragPressed(MouseEvent event){
+
+        double posX = event.getX();
+        double posY = event.getY();
+        int row = (int)posY/60;
+        int col = (int)posX/60;
+
+        movingPieceImage = gamePlay.getCurrentPieceImage(row,col);
+
+        if(movingPieceImage != null){
+            movingPieceImage.setFitWidth(60.0);
+            movingPieceImage.setFitHeight(60.0);
+            // Initial position of the image
+            movingPieceImage.setX(posX - (movingPieceImage.getFitWidth() / 2));
+            movingPieceImage.setY(posY + (movingPieceImage.getFitHeight() / 2));
+            startX = posX;
+            startY = posY;
+            movingPieceImage.setMouseTransparent(true);
+            anchorPane.getChildren().add(movingPieceImage);
+        }
+    }
+    // This method will invoke when dragging piece
+    // Has no functionality for gamePlay
+    private void mouseDragged(MouseEvent event){
+
+        // Change image position
+        double posX = event.getX();
+        double posY = event.getY();
+
+        if(movingPieceImage != null){
+            // change moving piece position
+            movingPieceImage.setX(posX - (movingPieceImage.getFitWidth() / 2));
+            movingPieceImage.setY(posY + (movingPieceImage.getFitHeight() / 2));
+        }
+
+    }
+
+    // This method will invoke when a press is released
+    // Works both for click and drag using DRAG_THREESHOLD
+    private void mouseDragRelease(MouseEvent event){
+
+        if(gamePlay.getGameOver()) return;
+        // Remove the image
+
+        // Check if a valid move is made or not
+        if(movingPieceImage != null){
+            anchorPane.getChildren().remove(movingPieceImage);
+            movingPieceImage = null;
+            double posX = event.getX();
+            double posY = event.getY();
+            int row = (int)posY/60;
+            int col = (int)posX/60;
+            int index = row * 8 + col;
+
+
+            double distance = Math.abs(posX-startX) + Math.abs(posY-startY);
+
+            if(logic.isWithinBoard(row,col) && distance > DRAGGED_THREESHOLD)
+                gamePlay.play(squares[index],settings.gameType);
+        }
+    }
+
     public void setSettings(Settings settings){
         this.settings = settings;
 
@@ -73,12 +149,10 @@ public class Game_Controller implements Initializable {
         System.out.println("sound : "+settings.isSound);
     }
 
-    private void mouseClick(StackPane square) {
+    private void mousePressed(MouseEvent event, StackPane square) {
 
-        // According to game
-        // 2v2 or computer
-        // Time control
-        gamePlay.play(square, settings.gameType);
+        if(event.getButton() != MouseButton.SECONDARY)
+            gamePlay.play(square, settings.gameType);
     }
     private void restartOnAction(ActionEvent event){
         loadFXML.loadGame(loadFXML.GAME_FXML,event,settings);

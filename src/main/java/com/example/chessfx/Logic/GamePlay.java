@@ -8,9 +8,13 @@ import com.example.chessfx.Logic.Other.Time;
 import com.example.chessfx.UI.Board_UI;
 import com.example.chessfx.UI.PawnPromotion;
 import com.example.chessfx.Logic.Other.SoundSetup;
+import javafx.scene.Node;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 
+import java.util.List;
 
 
 public class GamePlay {
@@ -74,6 +78,9 @@ public class GamePlay {
     public String getGameOverText(){
         return gameOverText;
     }
+    public boolean getGameOver(){
+        return gameOver;
+    }
     public boolean checkGameOver(){
 
         boolean timeEnd = false;
@@ -104,6 +111,25 @@ public class GamePlay {
             gameOverText = "White wins";
 
         gameOver = true;
+    }
+    public ImageView getCurrentPieceImage(int row,int col){
+
+        if(gameOver) return null;
+
+
+        if(gridLogic.isOwnPieceClick(row,col,turn)){
+            int index = row * 8 + col;
+
+            if(squares[index].isDisable()) return null;
+            List<Node> childrens = squares[index].getChildren();
+            for(Node node : childrens){
+                if(node instanceof ImageView originalImageView){
+                    Image copiedImage = originalImageView.getImage();
+                    return new ImageView(copiedImage);
+                }
+            }
+        }
+        return null;
     }
     private void myTurn(int row,int col){
 
