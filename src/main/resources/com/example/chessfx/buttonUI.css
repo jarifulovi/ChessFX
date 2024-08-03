@@ -132,3 +132,49 @@
     -fx-background-color: #388E3C; /* Even darker green for pressed effect */
     -fx-border-color: #388E3C; /* Matching border color */
 }
+
+/* CSS for combo box */
+/* Basic ComboBox styling */
+.combo-box {
+    -fx-background-color: #13aa52;
+    -fx-padding: 5px;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 2px;
+    -fx-font-weight: bold;
+}
+
+/* Styling for the arrow button */
+.combo-box .arrow-button {
+    -fx-background-color: #13aa52;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 2px;
+}
+
+/* Styling for the popup when expanded */
+.combo-box-popup {
+    -fx-background-color: #B0AAAA;
+    -fx-border-color: #2e8b57;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+}
+
+/* Item in the list */
+.combo-box .list-cell {
+    -fx-background-color: #B0AAAA;
+    -fx-text-fill: #333333;
+}
+/* Selected item in the combo-box */
+.combo-box .list-cell:selected {
+    -fx-background-color: #13aa52;
+    -fx-text-fill: #ffffff;
+}
+/* Hover on each items */
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #13aa52;
+    -fx-text-fill: #ffffff;
+}
+/* Selected item in the pop-up  */
+.combo-box-popup .list-cell:selected {
+    -fx-background-color: #13aa52;
+    -fx-text-fill: #ffffff;
+}

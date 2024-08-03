@@ -61,6 +61,8 @@ public class GamePlay {
         board_ui = new Board_UI(gridLogic.getGrid(),squares,defaultColor);
         pawnPromotion = new PawnPromotion(boardPane);
         soundSetup = new SoundSetup();
+        if(hasSound)
+            soundSetup.gameMusic(true);
 
         if(gameType == logic.ONE_PLAYER) {
             engine = new Engine(gridLogic,logic.getOpponentTurn(player));
@@ -156,18 +158,22 @@ public class GamePlay {
             return;
         }
 
-        // A valid move is played
-        if(firstClick && logic.validSquareClick(positions,row,col)){
 
-            if(logic.isPawnPromoting(piece,turn,player,row)) {
-                handlePawnPromotion(row,col);
-                return;
+        if(firstClick){
+            // A valid move is played
+            if(logic.validSquareClick(positions,row,col)) {
+                if (logic.isPawnPromoting(piece, turn, player, row)) {
+                    handlePawnPromotion(row, col);
+                    return;
+                }
+
+                update(piece, preRow, preCol, row, col);
+                // Turn becomes opponent
             }
-
-            // piece = new piece
-            update(piece,preRow,preCol,row,col);
-            // Turn becomes opponent
-            check = logic.isKingInCheck(gridLogic.getGrid(),turn,player);
+            else {
+                if(hasSound)
+                    soundSetup.illegalMusic(turn==player);
+            }
         }
 
         checkMoveAndReset();
@@ -191,7 +197,6 @@ public class GamePlay {
 
         update(engineMove.piece,engineMove.preRow,engineMove.preCol,engineMove.newRow,engineMove.newCol);
         // Turn becomes opponent
-        check = logic.isKingInCheck(gridLogic.getGrid(),turn,player);
 
         checkMoveAndReset();
         logic.displayTime(startTime);
@@ -210,34 +215,22 @@ public class GamePlay {
     private void mouseClickPP(StackPane square,int newRow,int newCol){
 
 
-        int index = Integer.parseInt(square.getId());
-        int newPiece = logic.NO_PIECE;
-
-        if(turn == logic.WHITE){
-            if     (index == 0) newPiece = logic.W_KNIGHT;
-            else if(index == 1) newPiece = logic.W_BISHOP;
-            else if(index == 2) newPiece = logic.W_QUEEN;
-            else if(index == 3) newPiece = logic.W_ROOK;
-        }
-        else{
-            if     (index == 0) newPiece = logic.B_KNIGHT;
-            else if(index == 1) newPiece = logic.B_BISHOP;
-            else if(index == 2) newPiece = logic.B_QUEEN;
-            else if(index == 3) newPiece = logic.B_ROOK;
-        }
+        int newPiece = logic.getNewPiecePP(square,turn);
         pawnPromotion.unSetPawnPromotion();
         // update
         piece = newPiece;
         update(piece,preRow,preCol,newRow,newCol);
         // Turn becomes opponent
-        check = logic.isKingInCheck(gridLogic.getGrid(),turn,player);
-
+        if(gridLogic.clickPiece(newRow,newCol) == logic.NO_PIECE && hasSound) {
+            soundSetup.pawnPromotionMusic(turn == player);
+        }
 
         checkMoveAndReset();
         if(gameType == logic.ONE_PLAYER){
             computerTurn();
         }
     }
+
     public void play(StackPane square,int gameType){
 
         if(gameOver) return;
@@ -261,15 +254,19 @@ public class GamePlay {
         gridLogic.updateGrid(player,piece,preRow,preCol,row,col);
         board_ui.updateUI(squares,gridLogic.getGrid(),preRow,preCol,row,col);
 
+        // Turn changes
         turn = (turn == logic.WHITE) ? logic.BLACK : logic.WHITE;
 
+        check = logic.isKingInCheck(gridLogic.getGrid(),turn,player);
+
         if(hasSound) {
-            soundSetup.startMusic(turn == player, isCapture, isCastle);
+            soundSetup.startMusic(turn == player, isCapture, isCastle, check);
         }
 
         if(hasTime) {
             updateTimer();
         }
+
     }
 
     private void checkMoveAndReset(){
@@ -292,6 +289,8 @@ public class GamePlay {
 
             if(check){
                 System.out.println("check-mate");
+                if(hasSound)
+                    soundSetup.gameMusic(false);
                 gameOverText = (turn==logic.WHITE) ? ("Black wins") : ("White wins");
             }
             else {

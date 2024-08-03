@@ -1,5 +1,7 @@
 package com.example.chessfx.Logic.Abstract;
 
+import javafx.scene.layout.StackPane;
+
 import java.util.Arrays;
 
 public abstract class logic {
@@ -75,6 +77,24 @@ public abstract class logic {
             return (turn==player) ? (newRow == 0) : (newRow == 7);
         }
         return false;
+    }
+    public static int getNewPiecePP(StackPane square,int turn) {
+        int index = Integer.parseInt(square.getId());
+        int newPiece = logic.NO_PIECE;
+
+        if(turn == logic.WHITE){
+            if     (index == 0) newPiece = logic.W_KNIGHT;
+            else if(index == 1) newPiece = logic.W_BISHOP;
+            else if(index == 2) newPiece = logic.W_QUEEN;
+            else if(index == 3) newPiece = logic.W_ROOK;
+        }
+        else{
+            if     (index == 0) newPiece = logic.B_KNIGHT;
+            else if(index == 1) newPiece = logic.B_BISHOP;
+            else if(index == 2) newPiece = logic.B_QUEEN;
+            else if(index == 3) newPiece = logic.B_ROOK;
+        }
+        return newPiece;
     }
     public static boolean drawByInsufficientMaterial(int[][] grid){
 

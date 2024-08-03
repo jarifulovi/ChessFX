@@ -4,11 +4,8 @@ import com.example.chessfx.Logic.Abstract.logic;
 
 
 // Settings will be created in Menu Controller
-// It will be passed to play, computer, options
-// In Options it will be modified
-// Then when loading menu it will pass the settings
-// Menu and Options will set settings when loading each other
-// At first Menu will initialize the first settings with default value
+// It will be passed to play, computer, options, about and gameOverUI
+
 public class Settings {
 
     public int boardType;

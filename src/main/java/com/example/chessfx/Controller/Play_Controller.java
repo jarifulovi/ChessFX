@@ -96,6 +96,7 @@ public class Play_Controller implements Initializable {
         comboBoxTime.getItems().addAll(timeOptions);
 
         comboBoxTime.setValue("No Time");
+        comboBoxTime.getStyleClass().add("combo-box");
         comboBoxTime.setOnAction(event -> timeControl());
 
     }

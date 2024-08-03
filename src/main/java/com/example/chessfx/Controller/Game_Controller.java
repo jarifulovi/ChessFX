@@ -9,6 +9,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
@@ -37,7 +38,7 @@ public class Game_Controller implements Initializable {
     public StackPane[] squares;
     private ImageView movingPieceImage;
     private double startX,startY;
-    private final double DRAGGED_THREESHOLD = 20.0;
+    private final double DRAGGED_THREESHOLD = 10.0;
     private GamePlay gamePlay;
     private GameOverUI gameOverUI;
     private Time time;   // Time only work when time is > 0 meaning the game has time odds
@@ -57,6 +58,8 @@ public class Game_Controller implements Initializable {
             square.setOnMousePressed(mouseEvent -> mousePressed(mouseEvent,square));
             index++;
         }
+        boardPane.setOnMouseEntered(mouseEvent -> boardPane.setCursor(Cursor.HAND));
+        boardPane.setOnMouseExited(mouseEvent -> boardPane.setCursor(Cursor.DEFAULT));
 
         boardPane.setOnMousePressed(this::mouseDragPressed);
         // When the drag is in progress in anchorPane
@@ -110,7 +113,6 @@ public class Game_Controller implements Initializable {
     private void mouseDragRelease(MouseEvent event){
 
         if(gamePlay.getGameOver()) return;
-        // Remove the image
 
         // Check if a valid move is made or not
         if(movingPieceImage != null){
@@ -125,8 +127,9 @@ public class Game_Controller implements Initializable {
 
             double distance = Math.abs(posX-startX) + Math.abs(posY-startY);
 
-            if(logic.isWithinBoard(row,col) && distance > DRAGGED_THREESHOLD)
-                gamePlay.play(squares[index],settings.gameType);
+            if(logic.isWithinBoard(row,col) && distance > DRAGGED_THREESHOLD) {
+                gamePlay.play(squares[index], settings.gameType);
+            }
         }
     }
 
