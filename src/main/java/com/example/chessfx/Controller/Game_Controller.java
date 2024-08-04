@@ -128,7 +128,7 @@ public class Game_Controller implements Initializable {
             double distance = Math.abs(posX-startX) + Math.abs(posY-startY);
 
             if(logic.isWithinBoard(row,col) && distance > DRAGGED_THREESHOLD) {
-                gamePlay.play(squares[index], settings.gameType);
+                gamePlay.play(squares[index], settings.gameType,true);
             }
         }
     }
@@ -155,7 +155,7 @@ public class Game_Controller implements Initializable {
     private void mousePressed(MouseEvent event, StackPane square) {
 
         if(event.getButton() != MouseButton.SECONDARY)
-            gamePlay.play(square, settings.gameType);
+            gamePlay.play(square, settings.gameType,false);
     }
     private void restartOnAction(ActionEvent event){
         loadFXML.loadGame(loadFXML.GAME_FXML,event,settings);

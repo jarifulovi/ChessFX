@@ -66,7 +66,7 @@ public class GamePlay {
 
         if(gameType == logic.ONE_PLAYER) {
             engine = new Engine(gridLogic,logic.getOpponentTurn(player));
-            if(player == logic.BLACK) computerTurn();
+            if(player == logic.BLACK) logic.delay(1000,this::computerTurn);
         }
     }
     private void init_timer(){
@@ -133,10 +133,11 @@ public class GamePlay {
         }
         return null;
     }
-    private void myTurn(int row,int col){
+    private void myTurn(int row,int col,boolean isDragged){
 
         if(gameOver) return;
         if(gameType == logic.ONE_PLAYER && turn != player) return;
+        if(isDragged && logic.isOwnPiece(gridLogic.getGrid()[row][col],turn)) return;
 
         long startTime = System.currentTimeMillis();
 
@@ -171,7 +172,7 @@ public class GamePlay {
                 // Turn becomes opponent
             }
             else {
-                if(hasSound)
+                if(hasSound && isDragged)
                     soundSetup.illegalMusic(turn==player);
             }
         }
@@ -227,11 +228,11 @@ public class GamePlay {
 
         checkMoveAndReset();
         if(gameType == logic.ONE_PLAYER){
-            computerTurn();
+            logic.delay(1000,this::computerTurn);
         }
     }
 
-    public void play(StackPane square,int gameType){
+    public void play(StackPane square,int gameType,boolean isDragged){
 
         if(gameOver) return;
 
@@ -240,11 +241,11 @@ public class GamePlay {
         int col = index%8;
 
         if(gameType == logic.TWO_PLAYER)
-            myTurn(row,col);
+            myTurn(row,col,isDragged);
         else {
 
-            myTurn(row,col);
-            computerTurn();
+            myTurn(row,col,isDragged);
+            logic.delay(1000,this::computerTurn);
         }
     }
     private void update(int piece,int preRow,int preCol,int row,int col){

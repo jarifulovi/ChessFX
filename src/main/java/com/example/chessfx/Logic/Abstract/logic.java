@@ -1,6 +1,10 @@
 package com.example.chessfx.Logic.Abstract;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.scene.layout.StackPane;
+import javafx.util.Duration;
 
 import java.util.Arrays;
 
@@ -439,9 +443,7 @@ public abstract class logic {
         newRow = row + direction;
         newCol = col + 1;
         if (isWithinBoard(newRow, newCol)){
-            if(logic.isOpponentPiece(grid[newRow][newCol], turn) && (grid[newRow][newCol] == W_PAWN || grid[newRow][newCol] == B_PAWN)) {
-                return true;
-            }
+            return logic.isOpponentPiece(grid[newRow][newCol], turn) && (grid[newRow][newCol] == W_PAWN || grid[newRow][newCol] == B_PAWN);
         }
 
 
@@ -482,16 +484,23 @@ public abstract class logic {
 
         int[][] copy = new int[8][8];
         for(int i=0;i<8;i++){
-            for(int j=0;j<8;j++) copy[i][j] = grid[i][j];
+            System.arraycopy(grid[i], 0, copy[i], 0, 8);
         }
         return copy;
     }
-    public static void delay(int milliseconds){
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public static void delay(int milliseconds, Runnable onFinish) {
+
+        Platform.runLater(() -> {
+            // Create a Timeline to handle the delay
+            Timeline timeline = new Timeline(new KeyFrame(Duration.millis(milliseconds), event -> {
+                // Execute the provided Runnable after the delay
+                if (onFinish != null) {
+                    onFinish.run();
+                }
+            }));
+            timeline.setCycleCount(1);
+            timeline.play();
+        });
     }
     public static void display(int[][] grid){
         for (int i = 0; i < 8; i++) {
