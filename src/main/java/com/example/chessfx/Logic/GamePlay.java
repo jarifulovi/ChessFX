@@ -32,6 +32,7 @@ public class GamePlay {
     private int gameType;
     private int turn = logic.WHITE;
     private boolean firstClick;
+    private int engineMoveDelay = 1000;
 
     int[][] positions = new int[0][0];
     int piece = logic.NO_PIECE;
@@ -65,8 +66,8 @@ public class GamePlay {
             soundSetup.gameMusic(true);
 
         if(gameType == logic.ONE_PLAYER) {
-            engine = new Engine(gridLogic,logic.getOpponentTurn(player));
-            if(player == logic.BLACK) logic.delay(1000,this::computerTurn);
+            engine = new Engine(gridLogic.getBoard(),logic.getOpponentTurn(player));
+            if(player == logic.BLACK) logic.delay(engineMoveDelay,this::computerTurn);
         }
     }
     private void init_timer(){
@@ -148,7 +149,7 @@ public class GamePlay {
             piece = gridLogic.clickPiece(row,col);
             preRow = row;
             preCol = col;
-            positions = gridLogic.getValidPositions(row,col,turn);
+            positions = gridLogic.getValidPositions(row,col);
 
             if(positions.length > 0){
                 firstClick = true;
@@ -228,7 +229,7 @@ public class GamePlay {
 
         checkMoveAndReset();
         if(gameType == logic.ONE_PLAYER){
-            logic.delay(1000,this::computerTurn);
+            logic.delay(engineMoveDelay,this::computerTurn);
         }
     }
 
@@ -245,7 +246,7 @@ public class GamePlay {
         else {
 
             myTurn(row,col,isDragged);
-            logic.delay(1000,this::computerTurn);
+            logic.delay(engineMoveDelay,this::computerTurn);
         }
     }
     private void update(int piece,int preRow,int preCol,int row,int col){

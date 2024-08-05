@@ -6,6 +6,7 @@ public class Move {
     public int preCol;
     public int newRow;
     public int newCol;
+
     public int piece;
     public int capturePiece;
     public Move(int preRow,int preCol,int newRow,int newCol){

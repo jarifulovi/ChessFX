@@ -1,5 +1,6 @@
 package com.example.chessfx.Logic.Abstract;
 
+import com.example.chessfx.Logic.Board;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -27,7 +28,7 @@ public abstract class logic {
     // GridPC constants
     public static int WHITE_EN_PASSANT = 15;
     public static int BLACK_EN_PASSANT = 16;
-    public static int NO_EN_PASSANT = 0;
+    public static int NO_EN_PASSANT = -1;
     public static int CASTLE = 17;
     public static int NO_CASTLE = 0;
 
@@ -136,11 +137,13 @@ public abstract class logic {
         // Piece cannot be a no piece
         return (piece <= 6) ? WHITE : BLACK;
     }
-    public static int[][] convertFENIntoGrid(String FEN){
+    public static Board convertFENIntoBoard(String FEN){
 
         String[] parts = FEN.split(" ");
         String pieceParts = parts[0];
-        int[][] grid = new int[8][8];
+        String castleParts = parts[2];
+        String enPassantPart = parts[3];
+        Board board = new Board();
 
         int row = 0;
         int col = 0;
@@ -152,7 +155,7 @@ public abstract class logic {
             }
             else if(Character.isLetter(ch)){
                 int piece = getPieceNumber(ch);
-                grid[row][col] = piece;
+                board.grid[row][col] = piece;
                 col++;
             }
 
@@ -161,7 +164,22 @@ public abstract class logic {
                 col = 0;
             }
         }
-        return grid;
+        // Handle castling rights
+        board.canWhiteLeftCastled = castleParts.contains("Q");
+        board.canWhiteRightCastled = castleParts.contains("K");
+        board.canBlackLeftCastled = castleParts.contains("q");
+        board.canBlackRightCastled = castleParts.contains("k");
+
+        // set board.enPassantIndex
+        if(!enPassantPart.equals("-")){
+            int enPassantRow = (enPassantPart.charAt(0) - 'a');
+            int enPassantCol = Character.getNumericValue(enPassantPart.charAt(1));
+            board.enPassantIndex = enPassantRow * 8 + enPassantCol;
+        }
+        else {
+            board.enPassantIndex = NO_EN_PASSANT;
+        }
+        return board;
     }
     private static int getPieceNumber(char piece) {
         // Map character to piece value
@@ -180,21 +198,6 @@ public abstract class logic {
             case 'K' -> logic.W_KING;
             default -> logic.NO_PIECE;
         };
-    }
-
-    public static int[][] setGridPC(String FEN){
-
-        int[][] gridPC = new int[8][8];
-        String[] parts = FEN.split(" ");
-        String castlingPart = parts[2];
-
-        // Set castling
-        gridPC[0][0] = logic.CASTLE;
-        gridPC[0][7] = logic.CASTLE;
-        gridPC[7][0] = logic.CASTLE;
-        gridPC[7][7] = logic.CASTLE;
-
-        return gridPC;
     }
 
     public static boolean validSquareClick(int[][] positions,int row,int col){

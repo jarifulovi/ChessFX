@@ -5,35 +5,38 @@ import com.example.chessfx.Logic.Abstract.logic;
 
 public class GridLogic {
 
-    private int[][] grid;
+    private Board board;
     private PieceLogic pieceLogic;
 
     public GridLogic(int player){
-        grid = new int[8][8];
+        board = new Board();
 
-        String FEN = "";
+        String FEN;
         if(player == logic.WHITE)
             FEN = logic.defaultWhitePlayerFEN;
         else
             FEN = logic.defaultBlackPlayerFEN;
 
-        grid = logic.convertFENIntoGrid(FEN);
+        board = logic.convertFENIntoBoard(FEN);
 
-        pieceLogic = new PieceLogic(player,FEN);
+        pieceLogic = new PieceLogic(player);
     }
     public int[][] getGrid(){
-        return this.grid;
+        return this.board.grid;
+    }
+    public Board getBoard(){
+        return board;
     }
     public boolean isOwnPieceClick(int row,int col,int turn){
 
-        return logic.isOwnPiece(grid[row][col],turn);
+        return logic.isOwnPiece(board.grid[row][col],turn);
     }
     public int clickPiece(int row,int col){
-        return grid[row][col];
+        return board.grid[row][col];
     }
-    public int[][] getValidPositions(int row,int col,int turn){
+    public int[][] getValidPositions(int row,int col){
 
-        return pieceLogic.allValidMoves(grid[row][col],row,col,grid);
+        return pieceLogic.allValidMoves(board,board.grid[row][col],row,col);
     }
 
     // For computer moves
@@ -43,10 +46,10 @@ public class GridLogic {
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                int piece = grid[i][j];
+                int piece = board.grid[i][j];
                 if (logic.isOwnPiece(piece, turn)) {
                     // Get valid moves for current piece
-                    allPositionGrid[i][j] = pieceLogic.allValidMoves(piece, i, j, grid);
+                    allPositionGrid[i][j] = pieceLogic.allValidMoves(board,piece, i, j);
                 }
             }
         }
@@ -75,17 +78,17 @@ public class GridLogic {
         int turn = logic.getPieceColor(piece);
 
         // Set and reset en passant ( must call before update )
-        pieceLogic.updateEnPassant(grid,piece,preRow,newRow,preCol,newCol,turn);
+        pieceLogic.updateEnPassant(board,piece,preRow,newRow,preCol,newCol,turn);
 
 
         // Updating grid
-        grid[preRow][preCol] = logic.NO_PIECE;
-        grid[newRow][newCol] = piece;
+        board.grid[preRow][preCol] = logic.NO_PIECE;
+        board.grid[newRow][newCol] = piece;
 
 
 
         // Update castling
-        pieceLogic.updateCastling(grid,player,piece,preRow,preCol,newRow,newCol);
+        pieceLogic.updateCastling(board,player,piece,preRow,preCol,newRow,newCol);
     }
 
 }

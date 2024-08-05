@@ -16,9 +16,6 @@ public class IllegalMove {
 
 
         int turn = logic.getPieceColor(piece);
-        // If the position is occupied by own king
-        int[] kingPos = logic.getKingPosition(grid,turn);
-        if(kingPos[0] == newRow && kingPos[1] == newCol) return true;
 
         tempGrid = logic.copyGrid(grid);
 
@@ -55,15 +52,15 @@ public class IllegalMove {
 
         // Right side or king side castling
         if(newCol > preCol){
-            castlePositions = new int[4][2];
-            for(int i=0;i<4;i++){
+            castlePositions = new int[3][2];
+            for(int i=0;i<3;i++){
                 castlePositions[i][0] = preRow;
                 castlePositions[i][1] = i+4;
             }
         }
         else {
-            castlePositions = new int[5][2];
-            for(int i=0;i<=4;i++){
+            castlePositions = new int[4][2];
+            for(int i=0;i<4;i++){
                 castlePositions[i][0] = preRow;
                 castlePositions[i][1] = i;
 

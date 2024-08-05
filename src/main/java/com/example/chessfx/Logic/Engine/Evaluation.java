@@ -1,6 +1,7 @@
 package com.example.chessfx.Logic.Engine;
 
 import com.example.chessfx.Logic.Abstract.logic;
+import com.example.chessfx.Logic.Board;
 
 public class Evaluation {
 
@@ -8,6 +9,21 @@ public class Evaluation {
     public Evaluation(int turn){
         this.turn = turn;
     }
+
+   public int getEvaluation(Board board,int turn){
+        int point = 0;
+        for(int i=0;i<8;i++){
+            for(int j=0;j<8;j++){
+                if(logic.isOwnPiece(board.grid[i][j],turn)){
+                   point += getPieceValue(board.grid[i][j]);
+                }
+                else if(logic.isOpponentPiece(board.grid[i][j],turn)){
+                    point -= getPieceValue(board.grid[i][j]);
+                }
+            }
+        }
+        return point;
+   }
     public Move getSafeMove(int[][] moves,int preRow,int preCol,int[][] tempGrid){
 
         for(int[] pos : moves){
