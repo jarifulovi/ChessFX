@@ -2,35 +2,33 @@ package com.example.chessfx.Logic.Engine;
 
 import com.example.chessfx.Logic.Abstract.logic;
 import com.example.chessfx.Logic.Board;
+import com.example.chessfx.Logic.Move;
 
 public class Evaluation {
 
-    private int turn;
-    public Evaluation(int turn){
-        this.turn = turn;
+    private PieceValueTable pieceValueTable;
+    private int enginePlayer;
+    public Evaluation(int enginePlayer){
+        this.enginePlayer = enginePlayer;
+        // EnginePlayer is the opponent for the player
+        pieceValueTable = new PieceValueTable(logic.getOpponentTurn(enginePlayer));
     }
 
    public int getEvaluation(Board board,int turn){
-        int point = 0;
-        for(int i=0;i<8;i++){
-            for(int j=0;j<8;j++){
-                if(logic.isOwnPiece(board.grid[i][j],turn)){
-                   point += getPieceValue(board.grid[i][j]);
-                }
-                else if(logic.isOpponentPiece(board.grid[i][j],turn)){
-                    point -= getPieceValue(board.grid[i][j]);
-                }
-            }
-        }
-        return point;
+
+        int pieceValue = (board.whitePieceValues-board.blackPieceValues);
+        int piecePositioanlValue = pieceValueTable.getPiecePositionalValue(true,board.grid,turn);
+
+        return (turn==logic.WHITE) ? pieceValue + piecePositioanlValue:
+                   -pieceValue + piecePositioanlValue;
    }
-    public Move getSafeMove(int[][] moves,int preRow,int preCol,int[][] tempGrid){
+    public Move getSafeMove(int[][] moves, int preRow, int preCol, int[][] tempGrid){
 
         for(int[] pos : moves){
             int row = pos[0];
             int col = pos[1];
 
-            if(!logic.isCheckSquare(tempGrid,row,col,turn,logic.getOpponentTurn(turn))){
+            if(!logic.isCheckSquare(tempGrid,row,col,enginePlayer,logic.getOpponentTurn(enginePlayer))){
                 return new Move(preRow,preCol,row,col,tempGrid[preRow][preCol]);
             }
         }
@@ -42,7 +40,7 @@ public class Evaluation {
         for(int[] pos : moves){
             int row = pos[0];
             int col = pos[1];
-            if(getPieceValue(tempGrid[preRow][preCol]) < getPieceValue(tempGrid[row][col])){
+            if(logic.getPieceValue(tempGrid[preRow][preCol]) < logic.getPieceValue(tempGrid[row][col])){
                 return new Move(preRow,preCol,row,col,tempGrid[preRow][preCol]);
             }
         }
@@ -53,8 +51,8 @@ public class Evaluation {
         for(int[] pos : moves){
             int row = pos[0];
             int col = pos[1];
-            if(!logic.isCheckSquare(tempGrid,row,col,turn,logic.getOpponentTurn(turn))){
-                if(logic.isOpponentPiece(tempGrid[row][col],turn)){
+            if(!logic.isCheckSquare(tempGrid,row,col,enginePlayer,logic.getOpponentTurn(enginePlayer))){
+                if(logic.isOpponentPiece(tempGrid[row][col],enginePlayer)){
                     return new Move(preRow,preCol,row,col,tempGrid[preRow][preCol]);
                 }
             }
@@ -68,8 +66,8 @@ public class Evaluation {
         for(int[] pos : moves){
             int row = pos[0];
             int col = pos[1];
-            if(logic.isCheckSquare(tempGrid,preRow,preCol,turn,logic.getOpponentTurn(turn))){
-                if(!logic.isCheckSquare(tempGrid,preRow,preCol,logic.getOpponentTurn(turn),turn)){
+            if(logic.isCheckSquare(tempGrid,preRow,preCol,enginePlayer,logic.getOpponentTurn(enginePlayer))){
+                if(!logic.isCheckSquare(tempGrid,preRow,preCol,logic.getOpponentTurn(enginePlayer),enginePlayer)){
                     isUndefendedPieceExist = true;
                 }
             }
@@ -94,13 +92,5 @@ public class Evaluation {
             }
         }
         return null;
-    }
-    private int getPieceValue(int piece) {
-        if (piece == logic.W_PAWN || piece == logic.B_PAWN) return 1;
-        if (piece == logic.W_KNIGHT || piece == logic.B_KNIGHT) return 3;
-        if (piece == logic.W_BISHOP || piece == logic.B_BISHOP) return 3;
-        if (piece == logic.W_ROOK || piece == logic.B_ROOK) return 5;
-        if (piece == logic.W_QUEEN || piece == logic.B_QUEEN) return 9;
-        return 0; // Empty square
     }
 }

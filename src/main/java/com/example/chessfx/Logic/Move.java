@@ -1,4 +1,6 @@
-package com.example.chessfx.Logic.Engine;
+package com.example.chessfx.Logic;
+
+import com.example.chessfx.Logic.Abstract.logic;
 
 public class Move {
 
@@ -9,6 +11,14 @@ public class Move {
 
     public int piece;
     public int capturePiece;
+
+    public Move(){
+        this.preRow = -1;
+        this.preCol = -1;
+        this.newRow = -1;
+        this.newCol = -1;
+        this.piece = logic.NO_PIECE;
+    }
     public Move(int preRow,int preCol,int newRow,int newCol){
         this.preRow = preRow;
         this.preCol = preCol;

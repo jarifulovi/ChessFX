@@ -1,8 +1,8 @@
 package com.example.chessfx.Logic.Engine;
 
 import com.example.chessfx.Logic.Board;
-import com.example.chessfx.Logic.GridLogic;
 import com.example.chessfx.Logic.Abstract.logic;
+import com.example.chessfx.Logic.Move;
 
 import java.util.*;
 
@@ -19,24 +19,25 @@ public class Engine {
     private Evaluation evaluation;
     private EngineGridLogic engineGridLogic;
     private Random random;
-    int lines = 0;
+    boolean isDebugged = true;
     public Engine(Board board, int enginePlayer){
         this.engineGridLogic = new EngineGridLogic(board,enginePlayer);
         this.random = new Random();
         this.evaluation = new Evaluation(enginePlayer);
     }
-    public Move bestMove(int turn,int player){
+    public Move bestMove(int turn, int player){
         Board tempBoard = engineGridLogic.getBoard().deepCopy();
         int bestValue = Integer.MIN_VALUE;
-        int depth = 3;
-        lines = 0;
+        int depth = 4;
         Move bestMove = null;
 
         List<Move> possibleMoves = engineGridLogic.getAllPossibleMove(tempBoard,turn);
+        Collections.shuffle(possibleMoves);
+
         for(Move move : possibleMoves){
             Board simulatedBoard = engineGridLogic.simulateBoard(tempBoard,move,player);
             int moveValue = alphaBeta(simulatedBoard, depth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE, false, logic.getOpponentTurn(turn),player);
-            if (moveValue > bestValue) {
+            if (moveValue >= bestValue) {
                 bestValue = moveValue;
                 bestMove = move;
             }
@@ -45,13 +46,22 @@ public class Engine {
         return bestMove;
     }
     public int alphaBeta(Board board, int depth, int alpha, int beta, boolean maximizingPlayer, int turn,int player) {
-        // Base case: if depth is 0 or the game is over, evaluate the board
+        // Base case: if depth is 0
         if (depth == 0) {
             return evaluation.getEvaluation(board, turn);
         }
-        lines++;
         List<Move> possibleMoves = engineGridLogic.getAllPossibleMove(board, turn);
-        System.out.println("moves : "+possibleMoves.size()+" at line "+ lines);
+        // If there are no possible moves, check for checkmate or stalemate
+        if (possibleMoves.isEmpty()) {
+            // Check for checkmate
+            if (logic.isKingInCheck(board.grid,turn,player)) {
+                return maximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+            }
+            // Check for stalemate
+            else {
+                return 0; // Draw scenario
+            }
+        }
 
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;

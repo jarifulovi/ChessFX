@@ -1,6 +1,7 @@
 package com.example.chessfx.Logic.Abstract;
 
 import com.example.chessfx.Logic.Board;
+import com.example.chessfx.Logic.Move;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -46,6 +47,8 @@ public abstract class logic {
     public static int BLACK_BOARD = 2;
     public static String defaultWhitePlayerFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     public static String defaultBlackPlayerFEN = "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 1";
+    public static String debugFEN = "rnb1kb1r/pp1ppppp/2q5/1Kp5/3Pn3/8/PPP1PPPP/RNBQ1BNR w kq - 6 6";
+
     public static String BACKGROUND_CSS = "-fx-background-color :";
     public static String FOREST_GREEN = "#69923e";
     public static String LIGHT_GREEN = "#baca44";
@@ -82,6 +85,27 @@ public abstract class logic {
             return (turn==player) ? (newRow == 0) : (newRow == 7);
         }
         return false;
+    }
+    public static int getPieceValue(int piece) {
+        if (piece == logic.W_PAWN || piece == logic.B_PAWN) return 100;
+        if (piece == logic.W_KNIGHT || piece == logic.B_KNIGHT) return 300;
+        if (piece == logic.W_BISHOP || piece == logic.B_BISHOP) return 300;
+        if (piece == logic.W_ROOK || piece == logic.B_ROOK) return 500;
+        if (piece == logic.W_QUEEN || piece == logic.B_QUEEN) return 900;
+        return 0; // Empty square
+    }
+    public static void updatePieceValues(Board board, Move move){
+        int piece = board.grid[move.newRow][move.newCol];
+        if(piece != logic.NO_PIECE){
+            if(logic.getPieceColor(piece) == logic.WHITE){
+                board.whitePieceValues -= logic.getPieceValue(piece);
+                board.blackPieceValues += logic.getPieceValue(piece);
+            }
+            else {
+                board.whitePieceValues += logic.getPieceValue(piece);
+                board.blackPieceValues -= logic.getPieceValue(piece);
+            }
+        }
     }
     public static int getNewPiecePP(StackPane square,int turn) {
         int index = Integer.parseInt(square.getId());
@@ -488,6 +512,16 @@ public abstract class logic {
         int[][] copy = new int[8][8];
         for(int i=0;i<8;i++){
             System.arraycopy(grid[i], 0, copy[i], 0, 8);
+        }
+        return copy;
+    }
+    public static int[][] copyOpponentGrid(int[][] grid){
+
+        int[][] copy = new int[8][8];
+        for(int i=0;i<8;i++){
+            for(int j=0;j<8;j++){
+                copy[i][j] = grid[7-i][7-j];
+            }
         }
         return copy;
     }

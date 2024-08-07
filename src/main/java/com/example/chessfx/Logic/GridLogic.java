@@ -73,22 +73,23 @@ public class GridLogic {
         return true;
     }
 
-    public void updateGrid(int player,int piece,int preRow,int preCol,int newRow,int newCol){
+    public void updateGrid(int player,Move move){
         // when a valid move is made by player or engine
-        int turn = logic.getPieceColor(piece);
+        int turn = logic.getPieceColor(move.piece);
+        logic.updatePieceValues(board,move);
 
         // Set and reset en passant ( must call before update )
-        pieceLogic.updateEnPassant(board,piece,preRow,newRow,preCol,newCol,turn);
+        pieceLogic.updateEnPassant(board,move.piece,move.preRow,move.newRow,move.preCol,move.newCol,turn);
 
 
         // Updating grid
-        board.grid[preRow][preCol] = logic.NO_PIECE;
-        board.grid[newRow][newCol] = piece;
+        board.grid[move.preRow][move.preCol] = logic.NO_PIECE;
+        board.grid[move.newRow][move.newCol] = move.piece;
 
 
 
         // Update castling
-        pieceLogic.updateCastling(board,player,piece,preRow,preCol,newRow,newCol);
+        pieceLogic.updateCastling(board,player,move.piece,move.preRow,move.preCol,move.newRow,move.newCol);
     }
 
 }

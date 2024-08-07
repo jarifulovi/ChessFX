@@ -3,7 +3,6 @@ package com.example.chessfx.Logic;
 import com.example.chessfx.Controller.Settings;
 import com.example.chessfx.Logic.Abstract.logic;
 import com.example.chessfx.Logic.Engine.Engine;
-import com.example.chessfx.Logic.Engine.Move;
 import com.example.chessfx.Logic.Other.Time;
 import com.example.chessfx.UI.Board_UI;
 import com.example.chessfx.UI.PawnPromotion;
@@ -32,11 +31,10 @@ public class GamePlay {
     private int gameType;
     private int turn = logic.WHITE;
     private boolean firstClick;
-    private int engineMoveDelay = 1000;
+    private int engineMoveDelay = 100;
 
     int[][] positions = new int[0][0];
-    int piece = logic.NO_PIECE;
-    int preRow = -1,preCol = -1;
+    Move currentMove;
     boolean check = false;
     boolean gameOver = false;
     String gameOverText;
@@ -57,6 +55,7 @@ public class GamePlay {
         else if(settings.boardType == logic.BROWN_BOARD) defaultColor = "white "+logic.BROWN;
         else if(settings.boardType == logic.BLACK_BOARD) defaultColor = "white "+logic.GRAY;
 
+        currentMove = new Move();
         this.firstClick = false;
         gridLogic = new GridLogic(player);
         board_ui = new Board_UI(gridLogic.getGrid(),squares,defaultColor);
@@ -141,14 +140,15 @@ public class GamePlay {
         if(isDragged && logic.isOwnPiece(gridLogic.getGrid()[row][col],turn)) return;
 
         long startTime = System.currentTimeMillis();
-
+        currentMove.newRow = row;
+        currentMove.newCol = col;
         board_ui.resetHighLight(squares,turn);
         // Move is choose to play
         if(gridLogic.isOwnPieceClick(row,col,turn)){
 
-            piece = gridLogic.clickPiece(row,col);
-            preRow = row;
-            preCol = col;
+            currentMove.piece = gridLogic.clickPiece(row,col);
+            currentMove.preRow = row;
+            currentMove.preCol = col;
             positions = gridLogic.getValidPositions(row,col);
 
             if(positions.length > 0){
@@ -164,12 +164,12 @@ public class GamePlay {
         if(firstClick){
             // A valid move is played
             if(logic.validSquareClick(positions,row,col)) {
-                if (logic.isPawnPromoting(piece, turn, player, row)) {
+                if (logic.isPawnPromoting(currentMove.piece, turn, player, row)) {
                     handlePawnPromotion(row, col);
                     return;
                 }
 
-                update(piece, preRow, preCol, row, col);
+                update(currentMove);
                 // Turn becomes opponent
             }
             else {
@@ -190,14 +190,14 @@ public class GamePlay {
         long startTime = System.currentTimeMillis();
 
         // Get row,col,piece
-        Move engineMove = engine.randomMove(turn);
+        Move engineMove = engine.bestMove(turn,player);
 
         if(logic.isPawnPromoting(engineMove.piece,turn,player,engineMove.newRow)){
 
             engineMove.piece = engine.getPawnPromotedPiece(turn);
         }
 
-        update(engineMove.piece,engineMove.preRow,engineMove.preCol,engineMove.newRow,engineMove.newCol);
+        update(engineMove);
         // Turn becomes opponent
 
         checkMoveAndReset();
@@ -220,8 +220,10 @@ public class GamePlay {
         int newPiece = logic.getNewPiecePP(square,turn);
         pawnPromotion.unSetPawnPromotion();
         // update
-        piece = newPiece;
-        update(piece,preRow,preCol,newRow,newCol);
+        currentMove.piece = newPiece;
+        currentMove.newRow = newRow;
+        currentMove.newCol = newCol;
+        update(currentMove);
         // Turn becomes opponent
         if(gridLogic.clickPiece(newRow,newCol) == logic.NO_PIECE && hasSound) {
             soundSetup.pawnPromotionMusic(turn == player);
@@ -249,12 +251,12 @@ public class GamePlay {
             logic.delay(engineMoveDelay,this::computerTurn);
         }
     }
-    private void update(int piece,int preRow,int preCol,int row,int col){
+    private void update(Move move){
 
-        boolean isCapture = (gridLogic.clickPiece(row,col) != logic.NO_PIECE);
-        boolean isCastle = logic.isCastle(piece,preCol,col);
-        gridLogic.updateGrid(player,piece,preRow,preCol,row,col);
-        board_ui.updateUI(squares,gridLogic.getGrid(),preRow,preCol,row,col);
+        boolean isCapture = (gridLogic.clickPiece(move.newRow,move.newCol) != logic.NO_PIECE);
+        boolean isCastle = logic.isCastle(move.piece,move.preCol,move.newCol);
+        gridLogic.updateGrid(player,move);
+        board_ui.updateUI(squares,gridLogic.getGrid(),move.preRow,move.preCol,move.newRow,move.newCol);
 
         // Turn changes
         turn = (turn == logic.WHITE) ? logic.BLACK : logic.WHITE;
@@ -306,8 +308,8 @@ public class GamePlay {
 
         firstClick = false;
         positions = new int[0][0];
-        piece = logic.NO_PIECE;
-        preRow = preCol = -1;
+        currentMove.piece = logic.NO_PIECE;
+        currentMove.preRow = currentMove.preCol = -1;
     }
     private void updateTimer(){
 

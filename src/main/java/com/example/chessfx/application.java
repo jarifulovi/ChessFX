@@ -10,8 +10,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-// Needs to use four boolean for castling
-// Needs to use en passant index
 public class application extends Application {
     @Override
     public void start(Stage stage) throws IOException {

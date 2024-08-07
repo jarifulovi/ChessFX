@@ -8,6 +8,8 @@ public class Board {
     public int enPassantIndex;
     public boolean canWhiteLeftCastled, canWhiteRightCastled, canBlackLeftCastled, canBlackRightCastled;
 
+    // This fields will be used in engine
+    public int whitePieceValues,blackPieceValues;
     public Board(){
         this.grid = new int[8][8];
         enPassantIndex = logic.NO_EN_PASSANT;
@@ -15,6 +17,8 @@ public class Board {
         canWhiteRightCastled = false;
         canBlackLeftCastled = false;
         canBlackRightCastled = false;
+        whitePieceValues = 3900;
+        blackPieceValues = 3900;
     }
     // Method to create a deep copy of the Board object
     public Board deepCopy() {
@@ -31,6 +35,8 @@ public class Board {
         copy.canWhiteRightCastled = this.canWhiteRightCastled;
         copy.canBlackLeftCastled = this.canBlackLeftCastled;
         copy.canBlackRightCastled = this.canBlackRightCastled;
+        copy.whitePieceValues = this.whitePieceValues;
+        copy.blackPieceValues = this.blackPieceValues;
 
         return copy;
     }
