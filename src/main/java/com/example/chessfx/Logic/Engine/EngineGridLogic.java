@@ -1,8 +1,8 @@
 package com.example.chessfx.Logic.Engine;
 
 import com.example.chessfx.Logic.Abstract.logic;
-import com.example.chessfx.Logic.Board;
-import com.example.chessfx.Logic.Move;
+import com.example.chessfx.Logic.Object.Board;
+import com.example.chessfx.Logic.Object.Move;
 import com.example.chessfx.Logic.PieceLogic;
 
 import java.util.ArrayList;
@@ -36,6 +36,10 @@ public class EngineGridLogic {
                     int[][] allPosition = pieceLogic.allValidMoves(board,board.grid[i][j],i,j);
                     for(int[] pos : allPosition){
                         Move move = new Move(i,j,pos[0],pos[1],board.grid[i][j]);
+                        if(logic.isPawnPromoting(board.grid[i][j],pos[0])){
+                            move.isPromotingPiece = true;
+                            move.promotedPiece = (turn==logic.WHITE) ? logic.W_QUEEN : logic.B_QUEEN;
+                        }
                         moves.add(move);
                     }
                 }
@@ -48,21 +52,15 @@ public class EngineGridLogic {
 
         Board simulatedBoard = board.deepCopy();
         int turn = logic.getPieceColor(move.piece);
-        boolean isPawn = (move.piece == logic.W_PAWN || move.piece == logic.B_PAWN);
-        logic.updatePieceValues(simulatedBoard,move);
+
+        simulatedBoard.update(move);
 
         // Set and reset en passant
         pieceLogic.updateEnPassant(simulatedBoard,move.piece,move.preRow,move.newRow,move.preCol,move.newCol,turn);
 
         // Updating grid
         simulatedBoard.grid[move.preRow][move.preCol] = logic.NO_PIECE;
-//        if(isPawn){
-//            boolean isBackRank = (move.newRow == 0 || move.newRow == 7);
-//            if(isBackRank)
-//                simulatedBoard.grid[move.newRow][move.newCol] = (turn==logic.WHITE) ? logic.W_QUEEN : logic.B_QUEEN;
-//        }
-//        else
-            simulatedBoard.grid[move.newRow][move.newCol] = move.piece;
+        simulatedBoard.grid[move.newRow][move.newCol] = move.piece;
 
         // Update castling
         pieceLogic.updateCastling(simulatedBoard,player,move.piece,move.preRow,move.preCol,move.newRow,move.newCol);

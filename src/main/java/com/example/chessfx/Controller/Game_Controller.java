@@ -3,7 +3,7 @@ import com.example.chessfx.Logic.*;
 
 import com.example.chessfx.Logic.Abstract.loadFXML;
 import com.example.chessfx.Logic.Abstract.logic;
-import com.example.chessfx.Logic.Other.Time;
+import com.example.chessfx.Other.Time;
 import com.example.chessfx.UI.GameOverUI;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;

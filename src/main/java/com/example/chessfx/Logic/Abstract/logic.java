@@ -1,7 +1,7 @@
 package com.example.chessfx.Logic.Abstract;
 
-import com.example.chessfx.Logic.Board;
-import com.example.chessfx.Logic.Move;
+import com.example.chessfx.Logic.Object.Board;
+import com.example.chessfx.Logic.Object.Move;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -25,15 +25,10 @@ public abstract class logic {
     public static int B_ROOK = 10;
     public static int B_QUEEN = 11;
     public static int B_KING = 12;
-
-    // GridPC constants
-    public static int WHITE_EN_PASSANT = 15;
-    public static int BLACK_EN_PASSANT = 16;
     public static int NO_EN_PASSANT = -1;
-    public static int CASTLE = 17;
-    public static int NO_CASTLE = 0;
 
     // For indicating players and turns
+
     public static int WHITE = 0;
     public static int BLACK = 1;
 
@@ -47,7 +42,7 @@ public abstract class logic {
     public static int BLACK_BOARD = 2;
     public static String defaultWhitePlayerFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     public static String defaultBlackPlayerFEN = "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 1";
-    public static String debugFEN = "rnb1kb1r/pp1ppppp/2q5/1Kp5/3Pn3/8/PPP1PPPP/RNBQ1BNR w kq - 6 6";
+    public static String debugFEN = "rnbqkb1r/pppppppp/5n2/8/3P4/5N2/PPP1PPPP/RNBQKB1R b KQkq - 0 6";
 
     public static String BACKGROUND_CSS = "-fx-background-color :";
     public static String FOREST_GREEN = "#69923e";
@@ -60,6 +55,10 @@ public abstract class logic {
     public static String BLACK_COLOR = "#000000";
     public static String WHITE_COLOR = "#ffffff";
 
+    // Engine related constants
+    public static int OPENING_PHASE = 0;
+    public static int MIDDLEGAME_PHASE = 1;
+    public static int ENDGAME_PHASE = 2;
 
     public static boolean isWithinBoard(int row,int col){
         return row >= 0 && row < 8 && col >= 0 && col < 8;
@@ -79,12 +78,9 @@ public abstract class logic {
         return row1 == row2 || col1 == col2;
     }
 
-    public static boolean isPawnPromoting(int piece,int turn,int player,int newRow){
+    public static boolean isPawnPromoting(int piece,int newRow){
 
-        if(piece == logic.W_PAWN || piece == logic.B_PAWN){
-            return (turn==player) ? (newRow == 0) : (newRow == 7);
-        }
-        return false;
+        return (piece == W_PAWN || piece == B_PAWN) && (newRow == 0 || newRow == 7);
     }
     public static int getPieceValue(int piece) {
         if (piece == logic.W_PAWN || piece == logic.B_PAWN) return 100;
@@ -95,15 +91,24 @@ public abstract class logic {
         return 0; // Empty square
     }
     public static void updatePieceValues(Board board, Move move){
-        int piece = board.grid[move.newRow][move.newCol];
-        if(piece != logic.NO_PIECE){
-            if(logic.getPieceColor(piece) == logic.WHITE){
-                board.whitePieceValues -= logic.getPieceValue(piece);
-                board.blackPieceValues += logic.getPieceValue(piece);
+
+        if(!move.isPromotingPiece) {
+            int capturedPiece = board.grid[move.newRow][move.newCol];
+            if (capturedPiece != logic.NO_PIECE) {
+                if (logic.getPieceColor(capturedPiece) == logic.WHITE) {
+                    board.whitePieceValues -= logic.getPieceValue(capturedPiece);
+                } else {
+                    board.blackPieceValues -= logic.getPieceValue(capturedPiece);
+                }
             }
-            else {
-                board.whitePieceValues += logic.getPieceValue(piece);
-                board.blackPieceValues -= logic.getPieceValue(piece);
+        }
+        else {
+            if (logic.getPieceColor(move.piece) == logic.WHITE) {
+                // White pawn promotes
+                board.whitePieceValues += logic.getPieceValue(move.promotedPiece) - logic.getPieceValue(move.piece);
+            } else if (logic.getPieceColor(move.piece) == logic.BLACK) {
+                // Black pawn promotes
+                board.blackPieceValues += logic.getPieceValue(move.promotedPiece) - logic.getPieceValue(move.piece);
             }
         }
     }
@@ -165,6 +170,7 @@ public abstract class logic {
 
         String[] parts = FEN.split(" ");
         String pieceParts = parts[0];
+        String turnPart = parts[1];
         String castleParts = parts[2];
         String enPassantPart = parts[3];
         Board board = new Board();
@@ -188,6 +194,7 @@ public abstract class logic {
                 col = 0;
             }
         }
+        board.currentTurn = (turnPart.equals("w")) ? logic.WHITE : logic.BLACK;
         // Handle castling rights
         board.canWhiteLeftCastled = castleParts.contains("Q");
         board.canWhiteRightCastled = castleParts.contains("K");
@@ -196,8 +203,10 @@ public abstract class logic {
 
         // set board.enPassantIndex
         if(!enPassantPart.equals("-")){
-            int enPassantRow = (enPassantPart.charAt(0) - 'a');
-            int enPassantCol = Character.getNumericValue(enPassantPart.charAt(1));
+            int enPassantCol = (enPassantPart.charAt(0) - 'a');
+            int enPassantRank = Character.getNumericValue(enPassantPart.charAt(1));
+            int enPassantRow = (board.currentTurn == logic.WHITE) ?
+                    8 - enPassantRank : enPassantRank - 1;
             board.enPassantIndex = enPassantRow * 8 + enPassantCol;
         }
         else {

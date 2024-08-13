@@ -2,6 +2,8 @@ package com.example.chessfx.Logic;
 
 
 import com.example.chessfx.Logic.Abstract.logic;
+import com.example.chessfx.Logic.Object.Board;
+import com.example.chessfx.Logic.Object.Move;
 
 public class GridLogic {
 
@@ -33,6 +35,9 @@ public class GridLogic {
     }
     public int clickPiece(int row,int col){
         return board.grid[row][col];
+    }
+    public boolean isThreeFoldRepitionHappens(){
+        return false;
     }
     public int[][] getValidPositions(int row,int col){
 
@@ -73,23 +78,29 @@ public class GridLogic {
         return true;
     }
 
-    public void updateGrid(int player,Move move){
+    public void updateGrid(int player, Move move){
         // when a valid move is made by player or engine
         int turn = logic.getPieceColor(move.piece);
-        logic.updatePieceValues(board,move);
+        board.update(move);
 
         // Set and reset en passant ( must call before update )
         pieceLogic.updateEnPassant(board,move.piece,move.preRow,move.newRow,move.preCol,move.newCol,turn);
 
 
         // Updating grid
-        board.grid[move.preRow][move.preCol] = logic.NO_PIECE;
-        board.grid[move.newRow][move.newCol] = move.piece;
-
+        if(move.isPromotingPiece){
+            board.grid[move.preRow][move.preCol] = logic.NO_PIECE;
+            board.grid[move.newRow][move.newCol] = move.promotedPiece;
+        }
+        else {
+            board.grid[move.preRow][move.preCol] = logic.NO_PIECE;
+            board.grid[move.newRow][move.newCol] = move.piece;
+        }
 
 
         // Update castling
         pieceLogic.updateCastling(board,player,move.piece,move.preRow,move.preCol,move.newRow,move.newCol);
+        if(board.hasGreatPieceMaterialAdvantage(turn)) System.out.println("Endgame happens");
     }
 
 }

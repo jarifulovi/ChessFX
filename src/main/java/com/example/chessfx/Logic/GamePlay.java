@@ -3,10 +3,11 @@ package com.example.chessfx.Logic;
 import com.example.chessfx.Controller.Settings;
 import com.example.chessfx.Logic.Abstract.logic;
 import com.example.chessfx.Logic.Engine.Engine;
-import com.example.chessfx.Logic.Other.Time;
+import com.example.chessfx.Logic.Object.Move;
+import com.example.chessfx.Other.Time;
 import com.example.chessfx.UI.Board_UI;
 import com.example.chessfx.UI.PawnPromotion;
-import com.example.chessfx.Logic.Other.SoundSetup;
+import com.example.chessfx.Other.SoundSetup;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -58,6 +59,7 @@ public class GamePlay {
         currentMove = new Move();
         this.firstClick = false;
         gridLogic = new GridLogic(player);
+        turn = gridLogic.getBoard().currentTurn;
         board_ui = new Board_UI(gridLogic.getGrid(),squares,defaultColor);
         pawnPromotion = new PawnPromotion(boardPane);
         soundSetup = new SoundSetup();
@@ -164,7 +166,7 @@ public class GamePlay {
         if(firstClick){
             // A valid move is played
             if(logic.validSquareClick(positions,row,col)) {
-                if (logic.isPawnPromoting(currentMove.piece, turn, player, row)) {
+                if (logic.isPawnPromoting(currentMove.piece, row)) {
                     handlePawnPromotion(row, col);
                     return;
                 }
@@ -192,9 +194,10 @@ public class GamePlay {
         // Get row,col,piece
         Move engineMove = engine.bestMove(turn,player);
 
-        if(logic.isPawnPromoting(engineMove.piece,turn,player,engineMove.newRow)){
+        if(logic.isPawnPromoting(engineMove.piece,engineMove.newRow)){
 
-            engineMove.piece = engine.getPawnPromotedPiece(turn);
+            engineMove.promotedPiece = engine.getPawnPromotedPiece(turn);
+            engineMove.isPromotingPiece = true;
         }
 
         update(engineMove);
@@ -220,9 +223,10 @@ public class GamePlay {
         int newPiece = logic.getNewPiecePP(square,turn);
         pawnPromotion.unSetPawnPromotion();
         // update
-        currentMove.piece = newPiece;
         currentMove.newRow = newRow;
         currentMove.newCol = newCol;
+        currentMove.isPromotingPiece = true;
+        currentMove.promotedPiece = newPiece;
         update(currentMove);
         // Turn becomes opponent
         if(gridLogic.clickPiece(newRow,newCol) == logic.NO_PIECE && hasSound) {
@@ -232,6 +236,7 @@ public class GamePlay {
         checkMoveAndReset();
         if(gameType == logic.ONE_PLAYER){
             logic.delay(engineMoveDelay,this::computerTurn);
+
         }
     }
 
@@ -282,6 +287,11 @@ public class GamePlay {
             gameOverText = "Draw";
             gameOver = true;
         }
+        if(gridLogic.isThreeFoldRepitionHappens()){
+            System.out.println("Threefold repition");
+            gameOverText = "Threefold Repition";
+            gameOver = true;
+        }
 
         // If provide a check then update check ui
         if(check){
@@ -305,10 +315,11 @@ public class GamePlay {
             gameOver = true;
         }
 
-
         firstClick = false;
         positions = new int[0][0];
         currentMove.piece = logic.NO_PIECE;
+        currentMove.promotedPiece = logic.NO_PIECE;
+        currentMove.isPromotingPiece = false;
         currentMove.preRow = currentMove.preCol = -1;
     }
     private void updateTimer(){

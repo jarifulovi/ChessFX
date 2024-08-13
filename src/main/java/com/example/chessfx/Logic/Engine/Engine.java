@@ -1,29 +1,26 @@
 package com.example.chessfx.Logic.Engine;
 
-import com.example.chessfx.Logic.Board;
+import com.example.chessfx.Logic.Object.Board;
 import com.example.chessfx.Logic.Abstract.logic;
-import com.example.chessfx.Logic.Move;
+import com.example.chessfx.Logic.Object.Move;
+import com.example.chessfx.Logic.Object.ZobristHash;
 
 import java.util.*;
 
 
-// Plays a random move
-// Prioritizes :
-//               1 : Promote a pawn to queen
-//               2 : Defend undefended piece
-//               3 : Capture opponent undefended pieces
-//               4 : Capture an advantageous capture
-//               5 : Move to a safe square
 public class Engine {
 
     private Evaluation evaluation;
     private EngineGridLogic engineGridLogic;
+    private ZobristHash zobristHash;
     private Random random;
     boolean isDebugged = true;
+    int lines = 0,tpLines = 0;
     public Engine(Board board, int enginePlayer){
         this.engineGridLogic = new EngineGridLogic(board,enginePlayer);
         this.random = new Random();
         this.evaluation = new Evaluation(enginePlayer);
+        this.zobristHash = new ZobristHash();
     }
     public Move bestMove(int turn, int player){
         Board tempBoard = engineGridLogic.getBoard().deepCopy();
@@ -32,7 +29,8 @@ public class Engine {
         Move bestMove = null;
 
         List<Move> possibleMoves = engineGridLogic.getAllPossibleMove(tempBoard,turn);
-        Collections.shuffle(possibleMoves);
+        possibleMoves = orderMovesByCapture(possibleMoves,tempBoard,turn);
+        //Collections.shuffle(possibleMoves);
 
         for(Move move : possibleMoves){
             Board simulatedBoard = engineGridLogic.simulateBoard(tempBoard,move,player);
@@ -42,15 +40,37 @@ public class Engine {
                 bestMove = move;
             }
         }
-
+        System.out.println("Number of lines : "+lines);
+        System.out.println("Number of tp lines : "+tpLines);
         return bestMove;
     }
+
+    private TranspositionTable transpositionTable = new TranspositionTable();
     public int alphaBeta(Board board, int depth, int alpha, int beta, boolean maximizingPlayer, int turn,int player) {
+
+        // Check the transposition table
+        long hash = zobristHash.calculateInitialHash(board);
+        TranspositionTable.TTEntry transpositionEntry = transpositionTable.get(hash, depth);
+        if (transpositionEntry != null) {
+            tpLines++;
+            switch (transpositionEntry.getNodeType()) {
+                case EXACT:
+                    return transpositionEntry.getValue();
+                case ALPHA:
+                    if (transpositionEntry.getValue() <= alpha) return alpha;
+                    break;
+                case BETA:
+                    if (transpositionEntry.getValue() >= beta) return beta;
+                    break;
+            }
+        }
         // Base case: if depth is 0
+        lines++;
         if (depth == 0) {
             return evaluation.getEvaluation(board, turn);
         }
         List<Move> possibleMoves = engineGridLogic.getAllPossibleMove(board, turn);
+        possibleMoves = orderMovesByCapture(possibleMoves,board,turn);
         // If there are no possible moves, check for checkmate or stalemate
         if (possibleMoves.isEmpty()) {
             // Check for checkmate
@@ -63,107 +83,72 @@ public class Engine {
             }
         }
 
+        int originalAlpha = alpha;
+        int value;
         if (maximizingPlayer) {
-            int maxEval = Integer.MIN_VALUE;
+            value = Integer.MIN_VALUE;
             for (Move move : possibleMoves) {
                 Board simulatedBoard = engineGridLogic.simulateBoard(board, move, player);
                 int eval = alphaBeta(simulatedBoard, depth - 1, alpha, beta, false, logic.getOpponentTurn(turn),player);
-                maxEval = Math.max(maxEval, eval);
+                value = Math.max(value, eval);
                 alpha = Math.max(alpha, eval);
                 if (beta <= alpha) {
                     break; // Beta cut-off
                 }
             }
-            return maxEval;
         } else {
-            int minEval = Integer.MAX_VALUE;
+            value = Integer.MAX_VALUE;
             for (Move move : possibleMoves) {
                 Board simulatedBoard = engineGridLogic.simulateBoard(board, move, player);
                 int eval = alphaBeta(simulatedBoard, depth - 1, alpha, beta, true, logic.getOpponentTurn(turn),player);
-                minEval = Math.min(minEval, eval);
+                value = Math.min(value, eval);
                 beta = Math.min(beta, eval);
                 if (beta <= alpha) {
                     break; // Alpha cut-off
                 }
             }
-            return minEval;
         }
+        // Store the evaluated value in the transposition table
+        TranspositionTable.NodeType nodeType;
+        if (value <= originalAlpha) {
+            nodeType = TranspositionTable.NodeType.ALPHA;
+        } else if (value >= beta) {
+            nodeType = TranspositionTable.NodeType.BETA;
+        } else {
+            nodeType = TranspositionTable.NodeType.EXACT;
+        }
+        transpositionTable.put(hash, value, depth, nodeType);
+        return value;
+    }
+    public List<Move> orderMovesByCapture(List<Move> moves, Board board, int turn) {
+        List<Integer> scores = new ArrayList<>();
+        List<Move> moveList = new ArrayList<>();
+
+        for (Move move : moves) {
+            Board simulatedBoard = engineGridLogic.simulateBoard(board, move, turn);
+            int captureValue = evaluation.getEvaluation(simulatedBoard, turn);
+            scores.add(captureValue);
+            moveList.add(move);
+        }
+
+        // Combine scores and moves into a list of indices
+        List<Integer> indices = new ArrayList<>();
+        for (int i = 0; i < scores.size(); i++) {
+            indices.add(i);
+        }
+
+        // Sort indices based on the corresponding scores
+        indices.sort((i1, i2) -> Integer.compare(scores.get(i2), scores.get(i1)));
+
+        // Create a new ordered list of moves based on sorted indices
+        List<Move> orderedMoves = new ArrayList<>();
+        for (int index : indices) {
+            orderedMoves.add(moveList.get(index));
+        }
+
+        return orderedMoves;
     }
 
-
-    public Move randomMove(int turn){
-
-        // Must have legal moves
-        int[][] tempGrid = engineGridLogic.getGrid();
-
-        List<int[]> ownPiecePositions = new ArrayList<>();
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                if (logic.isOwnPiece(tempGrid[i][j], turn)) {
-                    ownPiecePositions.add(new int[]{i, j});
-                }
-            }
-        }
-        Collections.shuffle(ownPiecePositions);
-
-        Move defaultMove = new Move(-1,-1,-1,-1);
-        int hierarchy = 0;
-        for (int[] pos : ownPiecePositions) {
-            int preRow = pos[0];
-            int preCol = pos[1];
-            int[][] moves = engineGridLogic.getValidPositions(preRow, preCol);
-
-            if (moves.length > 0) {
-                // Set defaultMove
-                if(defaultMove.preRow == -1){
-                    int index = random.nextInt(moves.length);
-                    defaultMove = new Move(preRow,preCol,moves[index][0],moves[index][1],tempGrid[preRow][preCol]);
-                }
-
-                // Check if a pawn is at promotion
-                Move pawnPromotionMove = evaluation.getPawnPromotionMove(moves,preRow,preCol,tempGrid);
-                if(pawnPromotionMove != null) return pawnPromotionMove;
-
-
-                // Check if there's a hanging piece
-                if(hierarchy < 4) {
-                    Move undefendedPieceDefendMove = evaluation.getUndefendedPieceDefendMove(moves, preRow, preCol, tempGrid);
-                    if (undefendedPieceDefendMove != null) {
-                        defaultMove = undefendedPieceDefendMove;
-                        hierarchy = 4;
-                    }
-                }
-
-                // Check if there's an undefended piece to capture
-                if(hierarchy < 3) {
-                    Move captureUndefendedMove = evaluation.getCaptureUndefendedMove(moves, preRow, preCol, tempGrid);
-                    if (captureUndefendedMove != null) {
-                        defaultMove = captureUndefendedMove;
-                        hierarchy = 3;
-                    }
-                }
-
-                // Check if there's an advantageous capture
-                if(hierarchy < 2) {
-                    Move captureMove = evaluation.getCaptureMove(moves, preRow, preCol, tempGrid);
-                    if (captureMove != null) {
-                        defaultMove = captureMove;
-                        hierarchy = 2;
-                    }
-                }
-
-                // Check for safe moves
-                if(hierarchy < 1){
-                    Move safeMove = evaluation.getSafeMove(moves,preRow,preCol,tempGrid);
-                    if(safeMove != null) defaultMove = safeMove;
-                    hierarchy = 1;
-                }
-            }
-        }
-
-        // defaultMove can't be unset as there will be legal move
-        return defaultMove;
-    }
     public int getPawnPromotedPiece(int turn){
 
 

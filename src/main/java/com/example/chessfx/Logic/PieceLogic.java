@@ -1,6 +1,7 @@
 package com.example.chessfx.Logic;
 
 import com.example.chessfx.Logic.Abstract.logic;
+import com.example.chessfx.Logic.Object.Board;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +21,7 @@ public class PieceLogic {
     }
 
     // Only pawns doesn't take own piece positions
-    public int[][] allValidMoves(Board board,int piece,int row,int col){
+    public int[][] allValidMoves(Board board, int piece, int row, int col){
 
         int[][] validSquares;
         int turn = logic.getPieceColor(piece);

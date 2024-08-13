@@ -29,3 +29,7 @@ public class application extends Application {
         launch();
     }
 }
+
+
+// (a-b pruning + move ordering) lines : 459404,538372 , avb time : 532ms
+// (a-b + mo + transposition)    lines : 447537,521130 , avg time : 272ms
