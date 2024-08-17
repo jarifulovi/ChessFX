@@ -9,6 +9,9 @@ public class Move {
     public int newRow;
     public int newCol;
 
+    public int preIndex;
+    public int newIndex;
+
     public int piece;
     public int capturePiece;
     public boolean isPromotingPiece;
@@ -19,9 +22,16 @@ public class Move {
         this.preCol = -1;
         this.newRow = -1;
         this.newCol = -1;
+        this.preIndex = -1;
+        this.newIndex = -1;
         this.piece = logic.NO_PIECE;
         this.isPromotingPiece = false;
         this.promotedPiece = logic.NO_PIECE;
+    }
+    public Move(int preIndex,int newIndex,int piece){
+        this.preIndex = preIndex;
+        this.newIndex = newIndex;
+        this.piece = piece;
     }
     public Move(int preRow,int preCol,int newRow,int newCol){
         this.preRow = preRow;

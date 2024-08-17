@@ -15,7 +15,7 @@ public class Engine {
     private ZobristHash zobristHash;
     private Random random;
     boolean isDebugged = true;
-    int lines = 0,tpLines = 0;
+    int lines = 0,tpLines = 0,qsLines = 0,qtpLines = 0;
     public Engine(Board board, int enginePlayer){
         this.engineGridLogic = new EngineGridLogic(board,enginePlayer);
         this.random = new Random();
@@ -29,7 +29,7 @@ public class Engine {
         Move bestMove = null;
 
         List<Move> possibleMoves = engineGridLogic.getAllPossibleMove(tempBoard,turn);
-        possibleMoves = orderMovesByCapture(possibleMoves,tempBoard,turn);
+        possibleMoves = orderMovesByEvaluation(possibleMoves,tempBoard,turn);
         //Collections.shuffle(possibleMoves);
 
         for(Move move : possibleMoves){
@@ -42,6 +42,8 @@ public class Engine {
         }
         System.out.println("Number of lines : "+lines);
         System.out.println("Number of tp lines : "+tpLines);
+        System.out.println("Number of qs lines : "+qsLines);
+        System.out.println("Number of q tp lines : "+qtpLines);
         return bestMove;
     }
 
@@ -67,10 +69,12 @@ public class Engine {
         // Base case: if depth is 0
         lines++;
         if (depth == 0) {
-            return evaluation.getEvaluation(board, turn);
+
+            //return quiescenseSearch(board,alpha,beta,maximizingPlayer,turn,player);
+            return evaluation.getEvaluation(board,turn);
         }
         List<Move> possibleMoves = engineGridLogic.getAllPossibleMove(board, turn);
-        possibleMoves = orderMovesByCapture(possibleMoves,board,turn);
+
         // If there are no possible moves, check for checkmate or stalemate
         if (possibleMoves.isEmpty()) {
             // Check for checkmate
@@ -82,6 +86,7 @@ public class Engine {
                 return 0; // Draw scenario
             }
         }
+        possibleMoves = orderMovesByEvaluation(possibleMoves,board,turn);
 
         int originalAlpha = alpha;
         int value;
@@ -120,14 +125,100 @@ public class Engine {
         transpositionTable.put(hash, value, depth, nodeType);
         return value;
     }
-    public List<Move> orderMovesByCapture(List<Move> moves, Board board, int turn) {
+    public int quiescenseSearch(Board board,int alpha, int beta, boolean maximizingPlayer, int turn,int player){
+        // Check the transposition table
+        long hash = zobristHash.calculateInitialHash(board);
+        TranspositionTable.TTEntry transpositionEntry = transpositionTable.get(hash, 0);
+        if (transpositionEntry != null) {
+            qtpLines++;
+            switch (transpositionEntry.getNodeType()) {
+                case EXACT:
+                    return transpositionEntry.getValue();
+                case ALPHA:
+                    if (transpositionEntry.getValue() <= alpha) return alpha;
+                    break;
+                case BETA:
+                    if (transpositionEntry.getValue() >= beta) return beta;
+                    break;
+            }
+        }
+        List<Move> possibleMoves = engineGridLogic.getAllPossibleMove(board, turn);
+        // If there are no possible moves, check for checkmate or stalemate
+        if (possibleMoves.isEmpty()) {
+            // Check for checkmate
+            if (logic.isKingInCheck(board.grid,turn,player)) {
+                return maximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+            }
+            // Check for stalemate
+            else {
+                return 0;
+            }
+        }
+        possibleMoves = getCaptureMoves(possibleMoves,board);
+        // If no capture move then evaluate
+        qsLines++;
+        if(possibleMoves.isEmpty()){
+            return evaluation.getEvaluation(board,turn);
+        }
+        possibleMoves = orderMovesByEvaluation(possibleMoves,board,turn);
+
+        int originalAlpha = alpha;
+        int value;
+        if (maximizingPlayer) {
+            value = Integer.MIN_VALUE;
+            for (Move move : possibleMoves) {
+                Board simulatedBoard = engineGridLogic.simulateBoard(board, move, player);
+                int eval = quiescenseSearch(simulatedBoard, alpha, beta, false, logic.getOpponentTurn(turn),player);
+                value = Math.max(value, eval);
+                alpha = Math.max(alpha, eval);
+                if (beta <= alpha) {
+                    break; // Beta cut-off
+                }
+            }
+        } else {
+            value = Integer.MAX_VALUE;
+            for (Move move : possibleMoves) {
+                Board simulatedBoard = engineGridLogic.simulateBoard(board, move, player);
+                int eval = quiescenseSearch(simulatedBoard, alpha, beta, true, logic.getOpponentTurn(turn),player);
+                value = Math.min(value, eval);
+                beta = Math.min(beta, eval);
+                if (beta <= alpha) {
+                    break; // Alpha cut-off
+                }
+            }
+        }
+        // Store the evaluated value in the transposition table
+        TranspositionTable.NodeType nodeType;
+        if (value <= originalAlpha) {
+            nodeType = TranspositionTable.NodeType.ALPHA;
+        } else if (value >= beta) {
+            nodeType = TranspositionTable.NodeType.BETA;
+        } else {
+            nodeType = TranspositionTable.NodeType.EXACT;
+        }
+        transpositionTable.put(hash, value, 0, nodeType);
+        return value;
+    }
+    public List<Move> getCaptureMoves(List<Move> moves, Board board){
+        List<Move> captureMoves = new ArrayList<>();
+
+        for(Move move : moves){
+            if(logic.isCapture(board,move)){
+                captureMoves.add(move);
+            }
+        }
+        return captureMoves;
+    }
+    public List<Move> orderMovesByEvaluation(List<Move> moves, Board board, int turn) {
+
+        if(moves.size() <= 1) return moves;
         List<Integer> scores = new ArrayList<>();
         List<Move> moveList = new ArrayList<>();
 
         for (Move move : moves) {
             Board simulatedBoard = engineGridLogic.simulateBoard(board, move, turn);
-            int captureValue = evaluation.getEvaluation(simulatedBoard, turn);
-            scores.add(captureValue);
+            int value = evaluation.getEvaluation(simulatedBoard, turn);
+            scores.add(value);
             moveList.add(move);
         }
 

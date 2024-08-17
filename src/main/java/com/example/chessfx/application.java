@@ -31,5 +31,7 @@ public class application extends Application {
 }
 
 
-// (a-b pruning + move ordering) lines : 459404,538372 , avb time : 532ms
-// (a-b + mo + transposition)    lines : 447537,521130 , avg time : 272ms
+// (a-b pruning + move ordering) avg lines : 459404,538372 , avb time : 532ms
+// (a-b + mo + transposition)    avg lines : 447537,521130 , avg time : 272ms
+// ( with quiescense search )    lines : 72104 + 478332          time : 17953ms
+// ( qs + move ordering )        lines : 72115 + 258533          time : 10876ms

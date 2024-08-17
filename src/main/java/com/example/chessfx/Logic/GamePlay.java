@@ -2,6 +2,8 @@ package com.example.chessfx.Logic;
 
 import com.example.chessfx.Controller.Settings;
 import com.example.chessfx.Logic.Abstract.logic;
+import com.example.chessfx.Logic.Engine.BitBoard.BitBoardLogic;
+import com.example.chessfx.Logic.Engine.BitBoard.Bitboard;
 import com.example.chessfx.Logic.Engine.Engine;
 import com.example.chessfx.Logic.Object.Move;
 import com.example.chessfx.Other.Time;
@@ -135,6 +137,7 @@ public class GamePlay {
         }
         return null;
     }
+    private BitBoardLogic bitBoardLogic = new BitBoardLogic();
     private void myTurn(int row,int col,boolean isDragged){
 
         if(gameOver) return;
@@ -152,6 +155,14 @@ public class GamePlay {
             currentMove.preRow = row;
             currentMove.preCol = col;
             positions = gridLogic.getValidPositions(row,col);
+
+            Bitboard bitboard = bitBoardLogic.getBitBoard(gridLogic.getBoard(),player);
+            List<Move> moves = bitBoardLogic.getSinglePieceMoves(bitboard, currentMove.piece,turn);
+
+            for(Move move : moves){
+                System.out.println("Row : "+move.newIndex/8+" Col : "+move.newIndex%8);
+            }
+            System.out.println("Size : "+moves.size());
 
             if(positions.length > 0){
                 firstClick = true;

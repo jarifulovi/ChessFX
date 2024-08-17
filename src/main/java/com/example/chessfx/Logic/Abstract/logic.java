@@ -1,5 +1,6 @@
 package com.example.chessfx.Logic.Abstract;
 
+import com.example.chessfx.Logic.Engine.BitBoard.Bitboard;
 import com.example.chessfx.Logic.Object.Board;
 import com.example.chessfx.Logic.Object.Move;
 import javafx.animation.KeyFrame;
@@ -63,21 +64,21 @@ public abstract class logic {
     public static boolean isWithinBoard(int row,int col){
         return row >= 0 && row < 8 && col >= 0 && col < 8;
     }
+    public static boolean isWithinBoard(int index) { return (index >=0 && index < 64);}
     public static boolean isOwnPiece(int piece,int turn){
         if(piece == NO_PIECE) return false;
         return (turn == WHITE) == (piece <= 6);
+    }
+    public static boolean isSquareEmpty(long[] bitboards, int newIndex) {
+        return (bitboards[logic.NO_PIECE] & (1L << newIndex)) != 0;
+    }
+    public static boolean isSquareOccupied(long targetBitboard, int newIndex) {
+        return (targetBitboard & (1L << newIndex)) != 0;
     }
     public static boolean isOpponentPiece(int piece,int turn){
         if(piece == NO_PIECE) return false;
         return (turn != WHITE) == (piece <= 6);
     }
-    public static boolean isDiagonal(int row1,int col1,int row2,int col2){
-        return Math.abs(row1 - row2) == Math.abs(col1 - col2);
-    }
-    public static boolean isStraight(int row1, int col1, int row2, int col2) {
-        return row1 == row2 || col1 == col2;
-    }
-
     public static boolean isPawnPromoting(int piece,int newRow){
 
         return (piece == W_PAWN || piece == B_PAWN) && (newRow == 0 || newRow == 7);
@@ -515,6 +516,9 @@ public abstract class logic {
     }
     public static boolean isCastle(int piece,int preCol,int newCol){
         return ((piece == W_KING || piece == B_KING) && (Math.abs(preCol - newCol) == 2));
+    }
+    public static boolean isCapture(Board board,Move move){
+        return board.grid[move.newRow][move.newCol] != NO_PIECE;
     }
     public static int[][] copyGrid(int[][] grid){
 

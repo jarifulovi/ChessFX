@@ -20,7 +20,6 @@ public class PieceLogic {
         this.player = player;
     }
 
-    // Only pawns doesn't take own piece positions
     public int[][] allValidMoves(Board board, int piece, int row, int col){
 
         int[][] validSquares;
@@ -99,6 +98,7 @@ public class PieceLogic {
         }
         int rightCastleCol = col + 2;
         int leftCastleCol = col - 2;
+        // No need to check boundary as king will be at init position
         if(canCastle(board,true,row,turn)){
             validSquares[validSquareCount][0] = row;
             validSquares[validSquareCount][1] = rightCastleCol;
@@ -168,119 +168,34 @@ public class PieceLogic {
         }
         return Arrays.copyOf(validSquares,validSquareCount);
     }
-    // Position where the capture can occur
-    public void setEnPassant(Board board,int row,int col,int turn){
-        int enPassantRow = (turn==player) ? row + 1 : row - 1;
-        board.enPassantIndex = enPassantRow * 8 + col;
-        enPassantTurn = turn;
-    }
 
+    // Position where the capture can occur
     private boolean isEnPassant(Board board,int row,int col){
 
         int index = row * 8 + col;
         return board.enPassantIndex == index;
     }
-    // Position is where the capture happend
-    public void removeEnPassantPiece(int[][] grid,int turn,int row,int col){
 
-        int enPassantCaptureRow = (turn==player) ? row + 1 : row - 1;
-        grid[enPassantCaptureRow][col] = logic.NO_PIECE;
-    }
-
-    // This method has to call before updating grid
-    public void updateEnPassant(Board board,int piece,int preRow,int newRow,int preCol,int newCol,int turn){
-
-
-        if(piece == logic.W_PAWN || piece == logic.B_PAWN){
-            if(Math.abs(preRow - newRow) == 2){
-
-                setEnPassant(board,newRow,newCol,turn);
-            }
-            // If en passant capture happens
-            // When moves diagonally and new position doesn't have any opponent piece
-            if(Math.abs(preRow-newRow)==Math.abs(preCol-newCol)){
-                if(!logic.isOpponentPiece(board.grid[newRow][newCol],turn)){
-                    removeEnPassantPiece(board.grid,turn,newRow,newCol);
-                }
-            }
-        }
-        if(enPassantTurn != turn)
-            board.enPassantIndex = logic.NO_EN_PASSANT;
-    }
-    private boolean canCastle(Board board,boolean isRight,int row,int turn){
+    private boolean canCastle(Board board,boolean isRight,int row,int turn) {
 
         // If no piece along and castle piece are not moved
         boolean noPiece;
 
-        if(isRight) {
+        if (isRight) {
             noPiece = (board.grid[row][5] == logic.NO_PIECE) &&
                     (board.grid[row][6] == logic.NO_PIECE);
 
-        }
-        else
+        } else
             noPiece = (board.grid[row][1] == logic.NO_PIECE) && (board.grid[row][2] == logic.NO_PIECE)
                     && (board.grid[row][3] == logic.NO_PIECE);
 
 
-        if(turn==logic.WHITE){
-            if(isRight) return board.canWhiteRightCastled && noPiece;
-            else        return board.canWhiteLeftCastled && noPiece;
-        }
-        else {
-            if(isRight) return board.canBlackRightCastled && noPiece;
-            else        return board.canBlackLeftCastled && noPiece;
-        }
-    }
-    public void updateCastling(Board board,int player,int piece,int preRow,int preCol,int newRow,int newCol){
-
-        if(piece == logic.W_KING){
-            board.canWhiteLeftCastled = false;
-            board.canWhiteRightCastled = false;
-        }
-        if(piece == logic.B_KING){
-            board.canBlackLeftCastled = false;
-            board.canBlackRightCastled = false;
-        }
-        if(piece == logic.W_ROOK){
-            if(preCol == 0) board.canWhiteLeftCastled = false;
-            else if(preCol == 7) board.canWhiteRightCastled = false;
-        }
-        if(piece == logic.B_ROOK){
-            if(preCol == 0) board.canBlackLeftCastled = false;
-            else if(preCol == 7) board.canBlackRightCastled = false;
-        }
-        // If captured
-        if(player == logic.WHITE) {
-            if (board.grid[7][0] != logic.W_ROOK) board.canWhiteLeftCastled = false;
-            if (board.grid[7][7] != logic.W_ROOK) board.canWhiteRightCastled = false;
-            if (board.grid[0][0] != logic.B_ROOK) board.canBlackLeftCastled = false;
-            if (board.grid[0][7] != logic.B_ROOK) board.canBlackRightCastled = false;
-        }
-        else {
-            if (board.grid[7][0] != logic.B_ROOK) board.canBlackLeftCastled = false;
-            if (board.grid[7][7] != logic.B_ROOK) board.canBlackRightCastled = false;
-            if (board.grid[0][0] != logic.W_ROOK) board.canWhiteLeftCastled = false;
-            if (board.grid[0][7] != logic.W_ROOK) board.canWhiteRightCastled = false;
-        }
-
-        if(piece == logic.W_KING || piece == logic.B_KING){
-
-            if(Math.abs(preCol - newCol) == 2 && preRow == newRow)
-                updateRook(board.grid,piece,preRow,preCol,newCol);
-        }
-    }
-    private void updateRook(int[][] grid,int piece,int preRow,int preCol,int newCol){
-        // Only updates rook position as king is updated in gridLogic
-
-        int color = logic.getPieceColor(piece);
-        // Right side castle
-        if(newCol > preCol){
-            grid[preRow][preCol+1] = (color==logic.WHITE)?(logic.W_ROOK):(logic.B_ROOK);
-            grid[preRow][7] = logic.NO_PIECE;
-        }
-        else {
-            grid[preRow][preCol-1] = (color==logic.WHITE)?(logic.W_ROOK):(logic.B_ROOK);
-            grid[preRow][0] = logic.NO_PIECE;
+        if (turn == logic.WHITE) {
+            if (isRight) return board.canWhiteRightCastled && noPiece;
+            else return board.canWhiteLeftCastled && noPiece;
+        } else {
+            if (isRight) return board.canBlackRightCastled && noPiece;
+            else return board.canBlackLeftCastled && noPiece;
         }
     }
 
