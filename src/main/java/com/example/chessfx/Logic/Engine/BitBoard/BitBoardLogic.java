@@ -10,10 +10,14 @@ import java.util.List;
 public class BitBoardLogic {
     private BitboardConverter bitboardConverter;
     private BitBoardPieceLogic bitBoardPieceLogic;
+    public GenerateAttackSquare generateAttackSquare;
+    private FilterIllegalMove filterIllegalMove;
     private int enPassantTurn;
     public BitBoardLogic(){
         bitBoardPieceLogic = new BitBoardPieceLogic();
         bitboardConverter = new BitboardConverter();
+        generateAttackSquare = new GenerateAttackSquare();
+        filterIllegalMove = new FilterIllegalMove(generateAttackSquare);
         this.enPassantTurn = logic.NO_EN_PASSANT;
     }
     public Bitboard getBitBoard(Board board,int player) {
@@ -41,7 +45,7 @@ public class BitBoardLogic {
                 allPossibleMoves.addAll(bitBoardPieceLogic.generateValidMove(bitboard,piece));
             }
         }
-        return allPossibleMoves;
+        return filterIllegalMove.filterIllegalMove(bitboard,allPossibleMoves,turn);
     }
 
     public Bitboard simulateBitBoard(Bitboard bitboard,Move move){

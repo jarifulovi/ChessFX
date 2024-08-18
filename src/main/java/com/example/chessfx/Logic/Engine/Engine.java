@@ -15,7 +15,7 @@ public class Engine {
     private ZobristHash zobristHash;
     private Random random;
     boolean isDebugged = true;
-    int lines = 0,tpLines = 0,qsLines = 0,qtpLines = 0;
+    int lines = 0,tpLines = 0,qsLines = 0,qtpLines = 0,possibleMoveCount = 0;
     public Engine(Board board, int enginePlayer){
         this.engineGridLogic = new EngineGridLogic(board,enginePlayer);
         this.random = new Random();
@@ -29,6 +29,7 @@ public class Engine {
         Move bestMove = null;
 
         List<Move> possibleMoves = engineGridLogic.getAllPossibleMove(tempBoard,turn);
+        possibleMoveCount++;
         possibleMoves = orderMovesByEvaluation(possibleMoves,tempBoard,turn);
         //Collections.shuffle(possibleMoves);
 
@@ -44,6 +45,7 @@ public class Engine {
         System.out.println("Number of tp lines : "+tpLines);
         System.out.println("Number of qs lines : "+qsLines);
         System.out.println("Number of q tp lines : "+qtpLines);
+        System.out.println("Number of p mc : "+possibleMoveCount);
         return bestMove;
     }
 
@@ -74,6 +76,7 @@ public class Engine {
             return evaluation.getEvaluation(board,turn);
         }
         List<Move> possibleMoves = engineGridLogic.getAllPossibleMove(board, turn);
+        possibleMoveCount++;
 
         // If there are no possible moves, check for checkmate or stalemate
         if (possibleMoves.isEmpty()) {
@@ -143,6 +146,7 @@ public class Engine {
             }
         }
         List<Move> possibleMoves = engineGridLogic.getAllPossibleMove(board, turn);
+        possibleMoveCount++;
         // If there are no possible moves, check for checkmate or stalemate
         if (possibleMoves.isEmpty()) {
             // Check for checkmate

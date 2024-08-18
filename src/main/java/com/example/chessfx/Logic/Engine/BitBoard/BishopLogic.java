@@ -1,5 +1,6 @@
 package com.example.chessfx.Logic.Engine.BitBoard;
 
+import com.example.chessfx.Logic.Abstract.MagicBB;
 import com.example.chessfx.Logic.Abstract.logic;
 import com.example.chessfx.Logic.Object.Move;
 

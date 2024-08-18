@@ -10,6 +10,7 @@ import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
 import java.util.Arrays;
+import java.util.List;
 
 public abstract class logic {
 
@@ -559,6 +560,16 @@ public abstract class logic {
             }
             System.out.println();
         }
+    }
+    public static int[][] convertMoveToPosition(List<Move> moves){
+        int[][] pos = new int[moves.size()][2];
+        int i = 0;
+        for(Move move : moves){
+            pos[i][0] = move.newIndex / 8;
+            pos[i][1] = move.newIndex % 8;
+            i++;
+        }
+        return pos;
     }
     public static void displayPosition(int[][] positions){
         if(positions == null) return;

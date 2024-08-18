@@ -59,11 +59,10 @@ public class IllegalMove {
             }
         }
         else {
-            castlePositions = new int[4][2];
-            for(int i=0;i<4;i++){
+            castlePositions = new int[3][2];
+            for(int i=0;i<3;i++){
                 castlePositions[i][0] = preRow;
-                castlePositions[i][1] = i;
-
+                castlePositions[i][1] = i+2;
             }
         }
 

@@ -2,8 +2,7 @@ package com.example.chessfx.Logic;
 
 import com.example.chessfx.Controller.Settings;
 import com.example.chessfx.Logic.Abstract.logic;
-import com.example.chessfx.Logic.Engine.BitBoard.BitBoardLogic;
-import com.example.chessfx.Logic.Engine.BitBoard.Bitboard;
+import com.example.chessfx.Logic.Engine.BitBoard.*;
 import com.example.chessfx.Logic.Engine.Engine;
 import com.example.chessfx.Logic.Object.Move;
 import com.example.chessfx.Other.Time;
@@ -148,6 +147,10 @@ public class GamePlay {
         currentMove.newRow = row;
         currentMove.newCol = col;
         board_ui.resetHighLight(squares,turn);
+        Bitboard bitboard = bitBoardLogic.getBitBoard(gridLogic.getBoard(),player);
+        if(bitBoardLogic.generateAttackSquare.isSquareAttacked(bitboard,turn,row * 8 + col)){
+            System.out.println("Attacked by opponent");
+        }
         // Move is choose to play
         if(gridLogic.isOwnPieceClick(row,col,turn)){
 
@@ -156,12 +159,11 @@ public class GamePlay {
             currentMove.preCol = col;
             positions = gridLogic.getValidPositions(row,col);
 
-            Bitboard bitboard = bitBoardLogic.getBitBoard(gridLogic.getBoard(),player);
-            List<Move> moves = bitBoardLogic.getSinglePieceMoves(bitboard, currentMove.piece,turn);
-
-            for(Move move : moves){
-                System.out.println("Row : "+move.newIndex/8+" Col : "+move.newIndex%8);
-            }
+            List<Move> moves = bitBoardLogic.getAllPossibleMove(bitboard,turn);
+            positions = logic.convertMoveToPosition(moves);
+//            for(Move move : moves){
+//                System.out.println("Row : "+move.newIndex/8+" Col : "+move.newIndex%8);
+//            }
             System.out.println("Size : "+moves.size());
 
             if(positions.length > 0){

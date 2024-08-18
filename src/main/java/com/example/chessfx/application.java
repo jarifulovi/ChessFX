@@ -30,6 +30,9 @@ public class application extends Application {
     }
 }
 
+// depth == 6 , move generation = 104307
+// depth == 4 , move generation = 2346
+// depth == 4 + qs , m generation = 263310
 
 // (a-b pruning + move ordering) avg lines : 459404,538372 , avb time : 532ms
 // (a-b + mo + transposition)    avg lines : 447537,521130 , avg time : 272ms

@@ -1,4 +1,4 @@
-package com.example.chessfx.Logic.Engine.BitBoard;
+package com.example.chessfx.Logic.Abstract;
 
 
 import java.util.Arrays;
