@@ -4,26 +4,34 @@ package com.example.chessfx.Logic;
 import com.example.chessfx.Logic.Abstract.logic;
 import com.example.chessfx.Logic.Object.Board;
 import com.example.chessfx.Logic.Object.Move;
+import com.example.chessfx.Logic.Object.ZobristHash;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class GridLogic {
 
     private Board board;
     private PieceLogic pieceLogic;
+    private ZobristHash zobristHash;
+    private Map<Long,Integer> boardHash;
     private int player;
     private int enPassantTurn;
 
     public GridLogic(int player){
-        board = new Board();
+        this.board = new Board();
 
         String FEN;
         if(player == logic.WHITE)
-            FEN = logic.defaultWhitePlayerFEN;
+            FEN = logic.debugFEN;
         else
             FEN = logic.defaultBlackPlayerFEN;
 
-        board = logic.convertFENIntoBoard(FEN);
+        this.board = logic.convertFENIntoBoard(FEN);
 
-        pieceLogic = new PieceLogic(player);
+        this.pieceLogic = new PieceLogic(player);
+        this.zobristHash = new ZobristHash();
+        this.boardHash = new HashMap<>();
         this.player = player;
         this.enPassantTurn = logic.NO_EN_PASSANT;
     }
@@ -41,7 +49,8 @@ public class GridLogic {
         return board.grid[row][col];
     }
     public boolean isThreeFoldRepitionHappens(){
-        return false;
+        long currentHash = zobristHash.calculateHashBoard(board);
+        return boardHash.getOrDefault(currentHash,0) >= 3;
     }
     public int[][] getValidPositions(int row,int col){
 
@@ -104,7 +113,9 @@ public class GridLogic {
 
         // Update castling
         updateCastling(board,player,move.piece,move.preRow,move.preCol,move.newRow,move.newCol);
-        if(board.hasGreatPieceMaterialAdvantage(turn)) System.out.println("Endgame happens");
+        // Add the hash code
+        long currentHash = zobristHash.calculateHashBoard(board);
+        boardHash.put(currentHash,boardHash.getOrDefault(currentHash,0)+1);
     }
 
     public void setEnPassant(Board board,int row,int col,int turn){

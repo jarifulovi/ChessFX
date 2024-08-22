@@ -1,5 +1,8 @@
 package com.example.chessfx.Logic.Engine;
 
+import com.example.chessfx.Logic.Engine.BitBoard.BitBoardLogic;
+import com.example.chessfx.Logic.Engine.BitBoard.Bitboard;
+import com.example.chessfx.Logic.Engine.BitBoard.GenerateAttackSquare;
 import com.example.chessfx.Logic.Object.Board;
 import com.example.chessfx.Logic.Abstract.logic;
 import com.example.chessfx.Logic.Object.Move;
@@ -11,93 +14,125 @@ import java.util.*;
 public class Engine {
 
     private Evaluation evaluation;
-    private EngineGridLogic engineGridLogic;
+    private BitBoardLogic bitBoardLogic;
     private ZobristHash zobristHash;
-    private Random random;
+    private Map<Long,Integer> bitboardHash;
     boolean isDebugged = true;
+    int maxDepth = 4;
     int lines = 0,tpLines = 0,qsLines = 0,qtpLines = 0,possibleMoveCount = 0;
-    public Engine(Board board, int enginePlayer){
-        this.engineGridLogic = new EngineGridLogic(board,enginePlayer);
-        this.random = new Random();
-        this.evaluation = new Evaluation(enginePlayer);
+    public Engine(){
+        this.bitBoardLogic = new BitBoardLogic();
+        this.evaluation = new Evaluation();
         this.zobristHash = new ZobristHash();
+        this.bitboardHash = new HashMap<>();
     }
-    public Move bestMove(int turn, int player){
-        Board tempBoard = engineGridLogic.getBoard().deepCopy();
+    public Move bestMove(Board board,int turn, int player){
+        Bitboard tempBitboard = bitBoardLogic.getBitBoard(board,player);
+        long hash = zobristHash.calculateHashBitboard(tempBitboard,turn);
+        bitboardHash.put(hash,bitboardHash.getOrDefault(hash,0)+1);
         int bestValue = Integer.MIN_VALUE;
-        int depth = 4;
+        lines = 0;
+        tpLines = 0;
         Move bestMove = null;
 
-        List<Move> possibleMoves = engineGridLogic.getAllPossibleMove(tempBoard,turn);
+        List<Move> possibleMoves = bitBoardLogic.getAllPossibleMove(tempBitboard,turn);
         possibleMoveCount++;
-        possibleMoves = orderMovesByEvaluation(possibleMoves,tempBoard,turn);
-        //Collections.shuffle(possibleMoves);
+        possibleMoves = orderMovesByEvaluation(possibleMoves,tempBitboard,turn);
 
         for(Move move : possibleMoves){
-            Board simulatedBoard = engineGridLogic.simulateBoard(tempBoard,move,player);
-            int moveValue = alphaBeta(simulatedBoard, depth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE, false, logic.getOpponentTurn(turn),player);
+            Bitboard simulatedBitboard = bitBoardLogic.simulateBitBoard(tempBitboard,move);
+            int moveValue = alphaBeta(simulatedBitboard, maxDepth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE, false, logic.getOpponentTurn(turn),player);
+            System.out.println(move.preIndex+" "+move.newIndex+" value : "+moveValue);
             if (moveValue >= bestValue) {
                 bestValue = moveValue;
                 bestMove = move;
             }
         }
-        System.out.println("Number of lines : "+lines);
-        System.out.println("Number of tp lines : "+tpLines);
-        System.out.println("Number of qs lines : "+qsLines);
-        System.out.println("Number of q tp lines : "+qtpLines);
-        System.out.println("Number of p mc : "+possibleMoveCount);
+//        System.out.println("Number of nodes : "+lines);
+//        System.out.println("Number of tp nodes : "+tpLines);
+//        System.out.println("Number of qs nodes : "+qsLines);
+//        System.out.println("Number of q tp nodes : "+qtpLines);
+//        System.out.println("Number of p mc : "+possibleMoveCount);
+        if(bestMove != null) {
+            if(player == logic.WHITE) {
+                bestMove.preRow = bestMove.preIndex / 8;
+                bestMove.preCol = bestMove.preIndex % 8;
+                bestMove.newRow = bestMove.newIndex / 8;
+                bestMove.newCol = bestMove.newIndex % 8;
+            }
+            else {
+                bestMove.preRow = (63 - bestMove.preIndex) / 8;
+                bestMove.preCol = (63 - bestMove.preIndex) % 8;
+                bestMove.newRow = (63 - bestMove.newIndex) / 8;
+                bestMove.newCol = (63 - bestMove.newIndex) % 8;
+            }
+        }
         return bestMove;
     }
 
     private TranspositionTable transpositionTable = new TranspositionTable();
-    public int alphaBeta(Board board, int depth, int alpha, int beta, boolean maximizingPlayer, int turn,int player) {
+    public int alphaBeta(Bitboard bitboard, int depth, int alpha, int beta, boolean maximizingPlayer, int turn,int player) {
 
         // Check the transposition table
-        long hash = zobristHash.calculateInitialHash(board);
+        long hash = zobristHash.calculateHashBitboard(bitboard,turn);
+        bitboardHash.put(hash,bitboardHash.getOrDefault(hash,0)+1);
+        // Check threefold repition
+        if (bitboardHash.get(hash) >= 3) {
+            bitboardHash.put(hash, bitboardHash.get(hash) - 1);
+            return 0;
+        }
+
         TranspositionTable.TTEntry transpositionEntry = transpositionTable.get(hash, depth);
         if (transpositionEntry != null) {
             tpLines++;
             switch (transpositionEntry.getNodeType()) {
                 case EXACT:
+                    bitboardHash.put(hash,bitboardHash.getOrDefault(hash,1)-1);
                     return transpositionEntry.getValue();
                 case ALPHA:
-                    if (transpositionEntry.getValue() <= alpha) return alpha;
+                    if (transpositionEntry.getValue() <= alpha){
+                        bitboardHash.put(hash,bitboardHash.getOrDefault(hash,1)-1);
+                        return alpha;
+                    }
                     break;
                 case BETA:
-                    if (transpositionEntry.getValue() >= beta) return beta;
+                    if (transpositionEntry.getValue() >= beta){
+                        bitboardHash.put(hash,bitboardHash.getOrDefault(hash,1)-1);
+                        return beta;
+                    }
                     break;
             }
         }
         // Base case: if depth is 0
         lines++;
         if (depth == 0) {
-
-            //return quiescenseSearch(board,alpha,beta,maximizingPlayer,turn,player);
-            return evaluation.getEvaluation(board,turn);
+            bitboardHash.put(hash,bitboardHash.getOrDefault(hash,1)-1);
+            return evaluation.getEvaluationBB(bitboard,turn);
         }
-        List<Move> possibleMoves = engineGridLogic.getAllPossibleMove(board, turn);
+        List<Move> possibleMoves = bitBoardLogic.getAllPossibleMove(bitboard,turn);
         possibleMoveCount++;
 
         // If there are no possible moves, check for checkmate or stalemate
         if (possibleMoves.isEmpty()) {
             // Check for checkmate
-            if (logic.isKingInCheck(board.grid,turn,player)) {
-                return maximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+            bitboardHash.put(hash,bitboardHash.getOrDefault(hash,1)-1);
+            if (GenerateAttackSquare.isOwnKingAttacked(bitboard,turn)) {
+                return maximizingPlayer ? (Integer.MIN_VALUE/maxDepth)*depth : (Integer.MAX_VALUE/maxDepth)*depth;
             }
             // Check for stalemate
             else {
                 return 0; // Draw scenario
             }
         }
-        possibleMoves = orderMovesByEvaluation(possibleMoves,board,turn);
+        possibleMoves = orderMovesByEvaluation(possibleMoves,bitboard,turn);
 
         int originalAlpha = alpha;
         int value;
         if (maximizingPlayer) {
             value = Integer.MIN_VALUE;
             for (Move move : possibleMoves) {
-                Board simulatedBoard = engineGridLogic.simulateBoard(board, move, player);
-                int eval = alphaBeta(simulatedBoard, depth - 1, alpha, beta, false, logic.getOpponentTurn(turn),player);
+                Bitboard simulatedBitboard = bitBoardLogic.simulateBitBoard(bitboard,move);
+                int eval = alphaBeta(simulatedBitboard, depth - 1, alpha, beta, false, logic.getOpponentTurn(turn),player);
                 value = Math.max(value, eval);
                 alpha = Math.max(alpha, eval);
                 if (beta <= alpha) {
@@ -107,8 +142,8 @@ public class Engine {
         } else {
             value = Integer.MAX_VALUE;
             for (Move move : possibleMoves) {
-                Board simulatedBoard = engineGridLogic.simulateBoard(board, move, player);
-                int eval = alphaBeta(simulatedBoard, depth - 1, alpha, beta, true, logic.getOpponentTurn(turn),player);
+                Bitboard simulatedBitboard = bitBoardLogic.simulateBitBoard(bitboard,move);
+                int eval = alphaBeta(simulatedBitboard, depth - 1, alpha, beta, true, logic.getOpponentTurn(turn),player);
                 value = Math.min(value, eval);
                 beta = Math.min(beta, eval);
                 if (beta <= alpha) {
@@ -126,102 +161,19 @@ public class Engine {
             nodeType = TranspositionTable.NodeType.EXACT;
         }
         transpositionTable.put(hash, value, depth, nodeType);
+        bitboardHash.put(hash,bitboardHash.getOrDefault(hash,1)-1);
         return value;
     }
-    public int quiescenseSearch(Board board,int alpha, int beta, boolean maximizingPlayer, int turn,int player){
-        // Check the transposition table
-        long hash = zobristHash.calculateInitialHash(board);
-        TranspositionTable.TTEntry transpositionEntry = transpositionTable.get(hash, 0);
-        if (transpositionEntry != null) {
-            qtpLines++;
-            switch (transpositionEntry.getNodeType()) {
-                case EXACT:
-                    return transpositionEntry.getValue();
-                case ALPHA:
-                    if (transpositionEntry.getValue() <= alpha) return alpha;
-                    break;
-                case BETA:
-                    if (transpositionEntry.getValue() >= beta) return beta;
-                    break;
-            }
-        }
-        List<Move> possibleMoves = engineGridLogic.getAllPossibleMove(board, turn);
-        possibleMoveCount++;
-        // If there are no possible moves, check for checkmate or stalemate
-        if (possibleMoves.isEmpty()) {
-            // Check for checkmate
-            if (logic.isKingInCheck(board.grid,turn,player)) {
-                return maximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-            }
-            // Check for stalemate
-            else {
-                return 0;
-            }
-        }
-        possibleMoves = getCaptureMoves(possibleMoves,board);
-        // If no capture move then evaluate
-        qsLines++;
-        if(possibleMoves.isEmpty()){
-            return evaluation.getEvaluation(board,turn);
-        }
-        possibleMoves = orderMovesByEvaluation(possibleMoves,board,turn);
 
-        int originalAlpha = alpha;
-        int value;
-        if (maximizingPlayer) {
-            value = Integer.MIN_VALUE;
-            for (Move move : possibleMoves) {
-                Board simulatedBoard = engineGridLogic.simulateBoard(board, move, player);
-                int eval = quiescenseSearch(simulatedBoard, alpha, beta, false, logic.getOpponentTurn(turn),player);
-                value = Math.max(value, eval);
-                alpha = Math.max(alpha, eval);
-                if (beta <= alpha) {
-                    break; // Beta cut-off
-                }
-            }
-        } else {
-            value = Integer.MAX_VALUE;
-            for (Move move : possibleMoves) {
-                Board simulatedBoard = engineGridLogic.simulateBoard(board, move, player);
-                int eval = quiescenseSearch(simulatedBoard, alpha, beta, true, logic.getOpponentTurn(turn),player);
-                value = Math.min(value, eval);
-                beta = Math.min(beta, eval);
-                if (beta <= alpha) {
-                    break; // Alpha cut-off
-                }
-            }
-        }
-        // Store the evaluated value in the transposition table
-        TranspositionTable.NodeType nodeType;
-        if (value <= originalAlpha) {
-            nodeType = TranspositionTable.NodeType.ALPHA;
-        } else if (value >= beta) {
-            nodeType = TranspositionTable.NodeType.BETA;
-        } else {
-            nodeType = TranspositionTable.NodeType.EXACT;
-        }
-        transpositionTable.put(hash, value, 0, nodeType);
-        return value;
-    }
-    public List<Move> getCaptureMoves(List<Move> moves, Board board){
-        List<Move> captureMoves = new ArrayList<>();
-
-        for(Move move : moves){
-            if(logic.isCapture(board,move)){
-                captureMoves.add(move);
-            }
-        }
-        return captureMoves;
-    }
-    public List<Move> orderMovesByEvaluation(List<Move> moves, Board board, int turn) {
+    public List<Move> orderMovesByEvaluation(List<Move> moves,Bitboard bitboard,int turn) {
 
         if(moves.size() <= 1) return moves;
         List<Integer> scores = new ArrayList<>();
         List<Move> moveList = new ArrayList<>();
 
         for (Move move : moves) {
-            Board simulatedBoard = engineGridLogic.simulateBoard(board, move, turn);
-            int value = evaluation.getEvaluation(simulatedBoard, turn);
+            Bitboard simulatedBitboard = bitBoardLogic.simulateBitBoard(bitboard,move);
+            int value = evaluation.getEvaluationBB(simulatedBitboard,turn);
             scores.add(value);
             moveList.add(move);
         }

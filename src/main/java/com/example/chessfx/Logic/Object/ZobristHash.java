@@ -1,17 +1,16 @@
 package com.example.chessfx.Logic.Object;
 import com.example.chessfx.Logic.Abstract.logic;
-import com.example.chessfx.Logic.Object.Board;
-import com.example.chessfx.Logic.Object.Move;
+import com.example.chessfx.Logic.Engine.BitBoard.Bitboard;
 
 import java.util.Random;
 
 public class ZobristHash {
 
     private long[][][] zobristTable; // [Piece Type][Row][Column]
+    private long[][] zobristTableBB; // [Piece Type][Index]
     private long zobristEnPassant;
     private long[] zobristCastlingRights;
     private long zobristTurnWhite,zobristTurnBlack;
-    private long currentHash;
 
     public ZobristHash() {
         initializeZobristTable();
@@ -20,12 +19,15 @@ public class ZobristHash {
     // Initialize the Zobrist table with random bitstrings
     private void initializeZobristTable() {
         Random random = new Random();
-        zobristTable = new long[13][8][8]; // 13 because 12 pieces + NO_PIECE
+        zobristTable = new long[13][8][8];
+        zobristTableBB = new long[13][64];
 
         for (int piece = 0; piece <= 12; piece++) {
             for (int row = 0; row < 8; row++) {
                 for (int col = 0; col < 8; col++) {
-                    zobristTable[piece][row][col] = random.nextLong();
+                    long value = random.nextLong();
+                    zobristTable[piece][row][col] = value;
+                    zobristTableBB[piece][row*8+col] = value;
                 }
             }
         }
@@ -45,7 +47,7 @@ public class ZobristHash {
     }
 
     // Calculate the initial Zobrist hash for the given board state
-    public long calculateInitialHash(Board board) {
+    public long calculateHashBoard(Board board) {
         long hash = 0L;
 
         // Hash the pieces on the board
@@ -65,7 +67,7 @@ public class ZobristHash {
         if (board.canBlackLeftCastled) hash ^= zobristCastlingRights[3];
 
         // Hash the en passant square if any
-        if (board.enPassantIndex != -1) {
+        if (board.enPassantIndex != logic.NO_EN_PASSANT) {
             hash ^= zobristEnPassant;
         }
 
@@ -79,18 +81,41 @@ public class ZobristHash {
         return hash;
     }
 
+    public long calculateHashBitboard(Bitboard bitboard, int turn) {
+        long hash = 0L;
 
-    // Method to update the Zobrist hash when a move is made
-    public void updateHash(Move move, boolean isWhiteTurn,boolean isCapture,boolean isCastle) {
-        // XOR out the piece from the old position
-        currentHash ^= zobristTable[move.piece][move.preRow][move.preCol];
+        // Hash all pieces on the board
+        for (int piece = 1; piece <= 12; piece++) {
+            long pieceBitboard = bitboard.bitboards[piece];
+            if (pieceBitboard != 0) {
+                // Iterate over each bit in the bitboard
+                while (pieceBitboard != 0) {
+                    int i = Long.numberOfTrailingZeros(pieceBitboard);
+                    pieceBitboard &= ~(1L << i);
+                    hash ^= zobristTableBB[piece][i];
+                }
+            }
+        }
 
-        // XOR in the piece at the new position
-        currentHash ^= zobristTable[move.piece][move.newRow][move.newCol];
+        // Hash castling rights
+        if (bitboard.whiteKingSideCastle) hash ^= zobristCastlingRights[0];
+        if (bitboard.whiteQueenSideCastle) hash ^= zobristCastlingRights[1];
+        if (bitboard.blackKingSideCastle) hash ^= zobristCastlingRights[2];
+        if (bitboard.blackQueenSideCastle) hash ^= zobristCastlingRights[3];
 
+        // Hash en passant
+        if (bitboard.enPassantIndex != logic.NO_EN_PASSANT) {
+            hash ^= zobristEnPassant;
+        }
 
-        // XOR the turn
-        if(isWhiteTurn) currentHash ^= zobristTurnWhite;
-        else            currentHash ^= zobristTurnBlack;
+        // Hash turn
+        if (turn == logic.WHITE) {
+            hash ^= zobristTurnWhite;
+        } else {
+            hash ^= zobristTurnBlack;
+        }
+
+        return hash;
     }
+
 }

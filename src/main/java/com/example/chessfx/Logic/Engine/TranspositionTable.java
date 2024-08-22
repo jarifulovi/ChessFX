@@ -15,7 +15,6 @@ public class TranspositionTable {
         return null;
     }
 
-
     public void put(Long hash, int value, int depth, NodeType nodeType) {
         table.put(hash, new TTEntry(value, depth, nodeType));
     }
@@ -36,5 +35,6 @@ public class TranspositionTable {
         public TranspositionTable.NodeType getNodeType() {
             return nodeType;
         }
+
     }
 }

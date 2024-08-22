@@ -3,11 +3,11 @@ package com.example.chessfx.Logic.Engine.BitBoard;
 import com.example.chessfx.Logic.Abstract.MagicBB;
 import com.example.chessfx.Logic.Abstract.logic;
 
-public class GenerateAttackSquare {
+public abstract class GenerateAttackSquare {
 
     // This class methods should invoke after BitBoardPieceLogic
     // Turn is current player
-    public long getAllAttackSquare(Bitboard bitboard,int turn){
+    public static long getAllAttackSquare(Bitboard bitboard,int turn){
 
         long attackSquare = 0L;
         attackSquare |= getPawnAttackSquare(bitboard,turn);
@@ -17,12 +17,20 @@ public class GenerateAttackSquare {
 
         return attackSquare;
     }
-    public boolean isSquareAttacked(Bitboard bitboard,int turn,int square){
+    public static boolean isSquareAttacked(Bitboard bitboard,int turn,int square){
 
         long allAttackSquares = getAllAttackSquare(bitboard,logic.getOpponentTurn(turn));
         return logic.isSquareOccupied(allAttackSquares,square);
     }
-    private long getPawnAttackSquare(Bitboard bitboard,int turn){
+    public static boolean isOwnKingAttacked(Bitboard bitboard,int turn){
+
+        long bitboardForKing = (turn==logic.WHITE) ? bitboard.bitboards[logic.W_KING] :
+                                        bitboard.bitboards[logic.B_KING];
+
+        int index = Long.numberOfTrailingZeros(bitboardForKing);
+        return isSquareAttacked(bitboard,turn,index);
+    }
+    private static long getPawnAttackSquare(Bitboard bitboard,int turn){
 
         long attack = 0L;
         long bitBoardForPawn = (turn==logic.WHITE) ? bitboard.bitboards[logic.W_PAWN]
@@ -36,7 +44,7 @@ public class GenerateAttackSquare {
         }
         return attack;
     }
-    private long getKingAttackSquare(Bitboard bitboard,int turn){
+    private static long getKingAttackSquare(Bitboard bitboard,int turn){
 
         long attack = 0L;
         long bitBoardForKing = (turn==logic.WHITE) ? bitboard.bitboards[logic.W_KING]
@@ -48,7 +56,7 @@ public class GenerateAttackSquare {
 
         return attack;
     }
-    private long getKnightAttackSquare(Bitboard bitboard,int turn){
+    private static long getKnightAttackSquare(Bitboard bitboard,int turn){
 
         long attack = 0L;
         long bitBoardForKnights = (turn== logic.WHITE) ? bitboard.bitboards[logic.W_KNIGHT]
@@ -63,7 +71,7 @@ public class GenerateAttackSquare {
         }
         return attack;
     }
-    private long getSlidingPieceAttackSquare(Bitboard bitboard,int turn){
+    private static long getSlidingPieceAttackSquare(Bitboard bitboard,int turn){
 
         long attack = 0L;
 

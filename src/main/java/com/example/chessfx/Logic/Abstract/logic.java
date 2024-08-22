@@ -44,7 +44,11 @@ public abstract class logic {
     public static int BLACK_BOARD = 2;
     public static String defaultWhitePlayerFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     public static String defaultBlackPlayerFEN = "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 1";
+<<<<<<< HEAD
     public static String debugFEN = "rnbqkb1r/pppppppp/5n2/8/3P4/5N2/PPP1PPPP/RNBQKB1R b KQkq - 0 6";
+=======
+    public static String debugFEN = "3rk3/8/8/8/8/5K2/8/8 b - - 0 2";
+>>>>>>> 885feef (added_endgame_eval)
 
     public static String BACKGROUND_CSS = "-fx-background-color :";
     public static String FOREST_GREEN = "#69923e";

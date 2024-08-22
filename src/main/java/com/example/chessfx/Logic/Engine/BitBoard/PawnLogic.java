@@ -67,12 +67,20 @@ public class PawnLogic {
             int i = Long.numberOfTrailingZeros(bitboardForPawns);
             bitboardForPawns &= ~(1L << i);
 
+            int row = i / 8;
+            int col = i % 8;
             // Generate forward move ( 1 square )
             int newIndex = i + direction;
             if(logic.isWithinBoard(newIndex)){
+                // Empty square
                 if(logic.isSquareEmpty(bitboard.bitboards,newIndex)){
-                    // Empty square
-                    moves.add(new Move(i,newIndex,piece));
+                    // Pawn promotion
+                    if(newIndex/8 == 0 || newIndex/8 == 7){
+                        int promotedPiece = (turn==logic.WHITE)?logic.W_QUEEN:logic.B_QUEEN;
+                        moves.add(new Move(i,newIndex,piece,promotedPiece));
+                    }
+                    else
+                        moves.add(new Move(i,newIndex,piece));
 
                     // Check for initial two-square move
                     if((turn==logic.WHITE && (i/8) == 6) || (turn==logic.BLACK && (i/8) == 1)){
@@ -85,8 +93,6 @@ public class PawnLogic {
                 }
             }
             // Generate capture moves
-            int row = i / 8;
-            int col = i % 8;
             for(int dc = -1; dc <= 1; dc+= 2){
                 newIndex = i + dc + direction;
                 // Capture boundary checking needs row,col
@@ -94,7 +100,12 @@ public class PawnLogic {
                     long targetBitboard = (turn==logic.WHITE) ? bitboard.allBlackPieces : bitboard.allWhitePieces;
                     if(logic.isSquareOccupied(targetBitboard,newIndex) || isEnPassant(bitboard,newIndex)){
                         // Capture move
-                        moves.add(new Move(i,newIndex,piece));
+                        if(newIndex/8 == 0 || newIndex/8 == 7){
+                            int promotedPiece = (turn==logic.WHITE)?logic.W_QUEEN:logic.B_QUEEN;
+                            moves.add(new Move(i,newIndex,piece,promotedPiece));
+                        }
+                        else
+                            moves.add(new Move(i,newIndex,piece));
                     }
                 }
             }

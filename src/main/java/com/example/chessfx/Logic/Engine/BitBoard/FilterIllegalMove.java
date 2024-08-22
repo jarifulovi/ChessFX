@@ -8,12 +8,6 @@ import java.util.List;
 
 public class FilterIllegalMove {
 
-    private GenerateAttackSquare generateAttackSquare;
-
-    public FilterIllegalMove(GenerateAttackSquare gAS){
-        this.generateAttackSquare = gAS;
-    }
-
     public List<Move> filterIllegalMove(Bitboard bitboard,List<Move> moves,int turn){
         List<Move> filteredMoves = new ArrayList<>();
         for(Move move : moves){
@@ -73,7 +67,7 @@ public class FilterIllegalMove {
         else                  bitBoardForKing = bitboard.bitboards[logic.B_KING];
 
         int kingPos = Long.numberOfTrailingZeros(bitBoardForKing);
-        return generateAttackSquare.isSquareAttacked(bitboard,turn,kingPos);
+        return GenerateAttackSquare.isSquareAttacked(bitboard,turn,kingPos);
     }
     private boolean checkCastleIllegal(Bitboard bitboard,Move move,int turn){
 
@@ -103,7 +97,7 @@ public class FilterIllegalMove {
             castlePositions[2] = 4;
         }
 
-        long allAttackSquares = generateAttackSquare.getAllAttackSquare(bitboard,logic.getOpponentTurn(turn));
+        long allAttackSquares = GenerateAttackSquare.getAllAttackSquare(bitboard,logic.getOpponentTurn(turn));
         // check king in check
         for(int index : castlePositions){
             if(logic.isSquareOccupied(allAttackSquares,index)) return true;

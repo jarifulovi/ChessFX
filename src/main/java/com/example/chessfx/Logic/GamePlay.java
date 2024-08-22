@@ -41,7 +41,6 @@ public class GamePlay {
     boolean gameOver = false;
     String gameOverText;
 
-
     public GamePlay(GridPane boardPane, StackPane[] squares, Time time,Settings settings){
         // set board grid logic and ui
         this.squares = squares;
@@ -68,9 +67,10 @@ public class GamePlay {
             soundSetup.gameMusic(true);
 
         if(gameType == logic.ONE_PLAYER) {
-            engine = new Engine(gridLogic.getBoard(),logic.getOpponentTurn(player));
+            engine = new Engine();
             if(player == logic.BLACK) logic.delay(engineMoveDelay,this::computerTurn);
         }
+
     }
     private void init_timer(){
 
@@ -136,7 +136,7 @@ public class GamePlay {
         }
         return null;
     }
-    private BitBoardLogic bitBoardLogic = new BitBoardLogic();
+
     private void myTurn(int row,int col,boolean isDragged){
 
         if(gameOver) return;
@@ -147,10 +147,7 @@ public class GamePlay {
         currentMove.newRow = row;
         currentMove.newCol = col;
         board_ui.resetHighLight(squares,turn);
-        Bitboard bitboard = bitBoardLogic.getBitBoard(gridLogic.getBoard(),player);
-        if(bitBoardLogic.generateAttackSquare.isSquareAttacked(bitboard,turn,row * 8 + col)){
-            System.out.println("Attacked by opponent");
-        }
+
         // Move is choose to play
         if(gridLogic.isOwnPieceClick(row,col,turn)){
 
@@ -159,12 +156,18 @@ public class GamePlay {
             currentMove.preCol = col;
             positions = gridLogic.getValidPositions(row,col);
 
+<<<<<<< HEAD
             List<Move> moves = bitBoardLogic.getAllPossibleMove(bitboard,turn);
             positions = logic.convertMoveToPosition(moves);
 //            for(Move move : moves){
 //                System.out.println("Row : "+move.newIndex/8+" Col : "+move.newIndex%8);
 //            }
             System.out.println("Size : "+moves.size());
+=======
+            //List<Move> moves = bitBoardLogic.getSinglePieceMoves(bitboard, currentMove.piece, turn);    /////////
+            //positions = logic.convertMoveToPosition(moves);                               // Debug purpose
+            //System.out.println("Size : "+moves.size());                               /////////
+>>>>>>> 885feef (added_endgame_eval)
 
             if(positions.length > 0){
                 firstClick = true;
@@ -185,6 +188,7 @@ public class GamePlay {
                 }
 
                 update(currentMove);
+
                 // Turn becomes opponent
             }
             else {
@@ -205,7 +209,7 @@ public class GamePlay {
         long startTime = System.currentTimeMillis();
 
         // Get row,col,piece
-        Move engineMove = engine.bestMove(turn,player);
+        Move engineMove = engine.bestMove(gridLogic.getBoard(),turn,player);
 
         if(logic.isPawnPromoting(engineMove.piece,engineMove.newRow)){
 
@@ -274,6 +278,7 @@ public class GamePlay {
         boolean isCapture = (gridLogic.clickPiece(move.newRow,move.newCol) != logic.NO_PIECE);
         boolean isCastle = logic.isCastle(move.piece,move.preCol,move.newCol);
         gridLogic.updateGrid(player,move);
+
         board_ui.updateUI(squares,gridLogic.getGrid(),move.preRow,move.preCol,move.newRow,move.newCol);
 
         // Turn changes

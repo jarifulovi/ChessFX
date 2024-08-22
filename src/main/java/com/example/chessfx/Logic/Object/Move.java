@@ -28,16 +28,19 @@ public class Move {
         this.isPromotingPiece = false;
         this.promotedPiece = logic.NO_PIECE;
     }
+    // Normal construstor for engine
     public Move(int preIndex,int newIndex,int piece){
         this.preIndex = preIndex;
         this.newIndex = newIndex;
         this.piece = piece;
     }
-    public Move(int preRow,int preCol,int newRow,int newCol){
-        this.preRow = preRow;
-        this.preCol = preCol;
-        this.newRow = newRow;
-        this.newCol = newCol;
+    // Pawn promotion constructor
+    public Move(int preIndex,int newIndex,int piece,int promotedPiece){
+        this.preIndex = preIndex;
+        this.newIndex = newIndex;
+        this.piece = piece;
+        this.isPromotingPiece = true;
+        this.promotedPiece = promotedPiece;
     }
     public Move(int preRow,int preCol,int newRow,int newCol,int piece){
         this.preRow = preRow;
@@ -52,14 +55,6 @@ public class Move {
         this.newRow = move.newRow;
         this.newCol = move.newCol;
         this.piece = move.piece;
-    }
-    public Move(int preRow,int preCol,int newRow,int newCol,int piece,int capturePiece){
-        this.preRow = preRow;
-        this.preCol = preCol;
-        this.newRow = newRow;
-        this.newCol = newCol;
-        this.piece = piece;
-        this.capturePiece = capturePiece;
     }
 
     public boolean equals(Move move){

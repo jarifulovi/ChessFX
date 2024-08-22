@@ -10,14 +10,12 @@ import java.util.List;
 public class BitBoardLogic {
     private BitboardConverter bitboardConverter;
     private BitBoardPieceLogic bitBoardPieceLogic;
-    public GenerateAttackSquare generateAttackSquare;
     private FilterIllegalMove filterIllegalMove;
     private int enPassantTurn;
     public BitBoardLogic(){
         bitBoardPieceLogic = new BitBoardPieceLogic();
         bitboardConverter = new BitboardConverter();
-        generateAttackSquare = new GenerateAttackSquare();
-        filterIllegalMove = new FilterIllegalMove(generateAttackSquare);
+        filterIllegalMove = new FilterIllegalMove();
         this.enPassantTurn = logic.NO_EN_PASSANT;
     }
     public Bitboard getBitBoard(Board board,int player) {
@@ -40,8 +38,18 @@ public class BitBoardLogic {
     public List<Move> getAllPossibleMove(Bitboard bitboard,int turn){
 
         List<Move> allPossibleMoves = new ArrayList<>();
-        for(int piece = 1;piece < Bitboard.NUM_PIECE_TYPES; piece++){
-            if(logic.isOwnPiece(piece,turn) && bitboard.bitboards[piece] != 0){
+
+        int startIndex,endIndex;
+        if(turn==logic.WHITE){
+            startIndex = 1;     // White piece is ownPiece piece
+            endIndex = 7;       // Exclusive
+        }
+        else {
+            startIndex = 7;    // Black piece is ownPiece piece
+            endIndex = Bitboard.NUM_PIECE_TYPES;
+        }
+        for(int piece = startIndex;piece < endIndex; piece++){
+            if(bitboard.bitboards[piece] != 0){
                 allPossibleMoves.addAll(bitBoardPieceLogic.generateValidMove(bitboard,piece));
             }
         }
@@ -50,7 +58,6 @@ public class BitBoardLogic {
 
     public Bitboard simulateBitBoard(Bitboard bitboard,Move move){
 
-        // take a copy of bitboard
         int turn = logic.getPieceColor(move.piece);
         Bitboard simulatedBitBoard = new Bitboard(bitboard);
 
@@ -60,13 +67,29 @@ public class BitBoardLogic {
         int oldIndex = move.preIndex;
         int newIndex = move.newIndex;
 
-        // Needs to handle pawn promotion
-        simulatedBitBoard.bitboards[move.piece]  &= ~(1L << oldIndex);
-        simulatedBitBoard.bitboards[move.piece]  |=  (1L << newIndex);
+        if(move.isPromotingPiece){
+            simulatedBitBoard.bitboards[move.piece]  &= ~(1L << oldIndex);
+            // Promoted piece will be according to engine
+            // For now engine will always promote to a queen
+            simulatedBitBoard.bitboards[move.piece]  &= ~(1L << oldIndex);
+            simulatedBitBoard.bitboards[move.promotedPiece] |= (1L << newIndex);
+        }
+        else {
+            simulatedBitBoard.bitboards[move.piece] &= ~(1L << oldIndex);
+            simulatedBitBoard.bitboards[move.piece] |= (1L << newIndex);
+        }
 
         // Check for a capture and remove the captured piece
-        for (int i = 1; i < Bitboard.NUM_PIECE_TYPES; i++) {
-            if (i == move.piece) continue; // Skip the moving piece itself
+        int startIndex,endIndex;
+        if(turn==logic.WHITE){
+            startIndex = 7;     // Black piece is capture piece
+            endIndex = Bitboard.NUM_PIECE_TYPES;
+        }
+        else {
+            startIndex = 1;    // White piece is capture piece
+            endIndex = 7;      // Exclusive
+        }
+        for (int i = startIndex; i < endIndex; i++) {
             if (logic.isSquareOccupied(simulatedBitBoard.bitboards[i],newIndex)) {
                 simulatedBitBoard.bitboards[i] &= ~(1L << newIndex);
                 break; // Exit after removing the captured piece
