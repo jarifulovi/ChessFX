@@ -1,0 +1,180 @@
+/* CSS */
+.button-19 {
+  -fx-background-color: #1899D6;
+  -fx-border-color: transparent;
+  -fx-border-radius: 16px;
+  -fx-border-width: 0 0 4px;
+  -fx-font-family: "din-round", sans-serif;
+  -fx-font-size: 15px;
+  -fx-font-weight: bold;
+  -fx-text-fill: #FFFFFF;
+  -fx-padding: 13px 16px;
+  -fx-alignment: center;
+  -fx-text-alignment: center;
+  -fx-background-radius: 16px;
+  -fx-cursor: hand;
+  -fx-border-color: transparent;
+  -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0.5, 0, 1);
+  -fx-transition: fade 0.2s;
+}
+
+.button-19:disabled {
+  -fx-cursor: default;
+  -fx-opacity: 0.5;
+}
+
+.button-19:hover {
+  -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 5, 0.5, 0, 1);
+  -fx-background-color: #1CB0F6;
+}
+
+.button-19:pressed {
+  -fx-border-width: 4px 0 0;
+  -fx-background-color: transparent;
+}
+
+
+.button-20 {
+  -fx-background-color: #13aa52;
+  -fx-border-color: transparent;
+  -fx-border-radius: 16px;
+  -fx-border-width: 0 0 4px;
+  -fx-font-family: "din-round", sans-serif;
+  -fx-font-size: 15px;
+  -fx-font-weight: bold;
+  -fx-text-fill: #FFFFFF;
+  -fx-padding: 13px 16px;
+  -fx-alignment: center;
+  -fx-text-alignment: center;
+  -fx-background-radius: 16px;
+  -fx-cursor: hand;
+  -fx-border-color: transparent;
+  -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0.5, 0, 1);
+  -fx-transition: fade 0.2s;
+}
+
+.button-20:disabled {
+  -fx-cursor: default;
+  -fx-opacity: 0.5;
+}
+
+.button-20:hover {
+  -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 5, 0.5, 0, 1);
+  -fx-background-color: #42bb75;
+}
+
+.button-20:pressed {
+  -fx-border-width: 4px 0 0;
+  -fx-background-color: transparent;
+}
+
+
+/* CSS for .button-29 */
+.button-29 {
+  -fx-background-color: #4e7837;
+  -fx-background-radius: 6px;
+  -fx-effect: dropshadow(three-pass-box, rgba(45, 35, 66, 0.4), 4, 0.5, 0, 2);
+  -fx-text-fill: #fff;
+  -fx-cursor: hand;
+  -fx-alignment: center;
+}
+
+.button-29:focused {
+  -fx-effect: dropshadow(three-pass-box, #3c4fe0, 1.5, 0.5, 0, 0);
+}
+
+.button-29:hover {
+  -fx-effect: dropshadow(three-pass-box, rgba(45, 35, 66, 0.4), 8, 0.5, 0, 4);
+}
+
+.button-29:pressed {
+  -fx-effect: dropshadow(three-pass-box, #3c4fe0, 7, 0.5, 0, 3);
+}
+
+
+/* General style for the ToggleButton */
+.toggle-button {
+    -fx-background-color: #4CAF50; /* Green background for default state */
+    -fx-background-radius: 10px; /* Rounded corners */
+    -fx-text-fill: #FFFFFF; /* White text color */
+    -fx-font-family: "Arial", sans-serif;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 16px; /* Padding inside the button */
+    -fx-cursor: hand; /* Pointer cursor on hover */
+    -fx-border-radius: 10px; /* Rounded corners for border */
+    -fx-border-width: 2px; /* Border width */
+    -fx-border-color: transparent; /* Border color for default state */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0.5, 0, 2); /* Shadow effect */
+    -fx-alignment: center;
+}
+
+/* Style for ToggleButton when selected (toggled on) */
+.toggle-button:selected {
+    -fx-background-color: #0C3710; /* Darker green for selected state */
+    -fx-border-color: #0C3710; /* Matching border color */
+}
+
+/* Style for ToggleButton on hover */
+.toggle-button:hover {
+    -fx-background-color: #66BB6A; /* Lighter green for hover effect */
+}
+
+
+/* Focused state */
+.toggle-button:focused {
+    -fx-effect: dropshadow(gaussian, rgba(33, 150, 243, 0.5), 6, 0.5, 0, 3); /* Blue shadow for focused effect */
+    -fx-background-color: #66BB6A; /* Change background color to match hover when focused */
+}
+
+/* Pressed state */
+.toggle-button:pressed {
+    -fx-background-color: #388E3C; /* Even darker green for pressed effect */
+    -fx-border-color: #388E3C; /* Matching border color */
+}
+
+/* CSS for combo box */
+/* Basic ComboBox styling */
+.combo-box {
+    -fx-background-color: #13aa52;
+    -fx-padding: 5px;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 2px;
+    -fx-font-weight: bold;
+}
+
+/* Styling for the arrow button */
+.combo-box .arrow-button {
+    -fx-background-color: #13aa52;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 2px;
+}
+
+/* Styling for the popup when expanded */
+.combo-box-popup {
+    -fx-background-color: #B0AAAA;
+    -fx-border-color: #2e8b57;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+}
+
+/* Item in the list */
+.combo-box .list-cell {
+    -fx-background-color: #B0AAAA;
+    -fx-text-fill: #333333;
+}
+/* Selected item in the combo-box */
+.combo-box .list-cell:selected {
+    -fx-background-color: #13aa52;
+    -fx-text-fill: #ffffff;
+}
+/* Hover on each items */
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #13aa52;
+    -fx-text-fill: #ffffff;
+}
+/* Selected item in the pop-up  */
+.combo-box-popup .list-cell:selected {
+    -fx-background-color: #13aa52;
+    -fx-text-fill: #ffffff;
+}

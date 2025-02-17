@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane fx:id="anchorPane" prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.chessfx.Controller.Options_Controller">
+   <children>
+      <Label alignment="CENTER" contentDisplay="CENTER" layoutX="271.0" layoutY="84.0" prefHeight="44.0" prefWidth="157.0" text="Options">
+         <font>
+            <Font name="System Bold Italic" size="40.0" />
+         </font>
+      </Label>
+      <AnchorPane fx:id="containPane" layoutX="190.0" layoutY="171.0" prefHeight="300.0" prefWidth="319.0">
+         <children>
+            <ToggleButton fx:id="soundToggleButton" layoutX="187.0" layoutY="12.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="69.0" />
+            <Label layoutX="80.0" layoutY="16.0" prefHeight="42.0" prefWidth="69.0" text="Sound">
+               <font>
+                  <Font size="22.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER" contentDisplay="CENTER" layoutX="96.0" layoutY="89.0" prefHeight="36.0" prefWidth="128.0" text="Choose board color" />
+            <Button fx:id="greenTile" alignment="CENTER" contentDisplay="CENTER" layoutX="14.0" layoutY="138.0" mnemonicParsing="false" prefHeight="70.0" prefWidth="79.0" textAlignment="CENTER" />
+            <Button fx:id="brownTile" alignment="CENTER" contentDisplay="CENTER" layoutX="120.0" layoutY="138.0" mnemonicParsing="false" prefHeight="70.0" prefWidth="79.0" textAlignment="CENTER" />
+            <Button fx:id="blackTile" alignment="CENTER" contentDisplay="CENTER" layoutX="222.0" layoutY="138.0" mnemonicParsing="false" prefHeight="70.0" prefWidth="79.0" textAlignment="CENTER" />
+         </children>
+      </AnchorPane>
+      <Button fx:id="backButton" layoutX="85.0" layoutY="85.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="70.0" text="Back" />
+   </children>
+</AnchorPane>
